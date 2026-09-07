@@ -35,6 +35,7 @@ final class LiveMetricSource: NSObject, MetricSource {
     private let store = HKHealthStore()
     private var session: HKWorkoutSession?
     private var builder: HKLiveWorkoutBuilder?
+    private var routeBuilder: HKWorkoutRouteBuilder?
     private let locationManager = CLLocationManager()
 
     private var startDate: Date?
@@ -63,7 +64,9 @@ final class LiveMetricSource: NSObject, MetricSource {
     // MARK: Authorization
 
     static var shareTypes: Set<HKSampleType> {
-        [HKQuantityType.workoutType()]
+        // The route is a separate series type; without permission to write it the workout
+        // saves fine but has no map.
+        [HKQuantityType.workoutType(), HKSeriesType.workoutRoute()]
     }
 
     static var readTypes: Set<HKObjectType> {
@@ -97,6 +100,10 @@ final class LiveMetricSource: NSObject, MetricSource {
 
         self.session = session
         self.builder = builder
+        // Taken from the workout builder rather than constructed directly, so the route is
+        // finished and attached automatically when the workout finishes — and discarded
+        // with it when we discard.
+        self.routeBuilder = builder.seriesBuilder(for: HKSeriesType.workoutRoute()) as? HKWorkoutRouteBuilder
 
         let start = Date()
         startDate = start
@@ -109,6 +116,9 @@ final class LiveMetricSource: NSObject, MetricSource {
         }
 
         locationManager.requestWhenInUseAuthorization()
+        // Without this, location updates stop the moment the screen sleeps — which would
+        // lose both the route and pace cues for most of the run.
+        locationManager.allowsBackgroundLocationUpdates = true
         locationManager.startUpdatingLocation()
 
         startTicking()
@@ -221,8 +231,16 @@ extension LiveMetricSource: HKLiveWorkoutBuilderDelegate {
 
 extension LiveMetricSource: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        // Route: keep anything with a usable fix. Filtering hard here would punch holes in
+        // the map, so the bar is lower than for pace.
+        let routable = locations.filter { $0.horizontalAccuracy >= 0 && $0.horizontalAccuracy <= 50 }
+        if !routable.isEmpty, savesToHealth {
+            routeBuilder?.insertRouteData(routable) { _, _ in }
+        }
+
         guard let location = locations.last else { return }
-        // A negative speed means no valid fix; below ~0.5 m/s the reading is drift, not pace.
+        // Pace is stricter: a negative speed means no valid fix, and below ~0.5 m/s the
+        // reading is GPS drift rather than movement.
         guard location.speed > 0.5, location.horizontalAccuracy >= 0, location.horizontalAccuracy < 50 else {
             latestPace = nil
             return
