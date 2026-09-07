@@ -80,8 +80,8 @@ struct PlanEditorView: View {
                     Text("Recording")
                 } footer: {
                     Text(plan.savesToHealth
-                         ? "runtil saves this run to Health, so it counts toward your rings and can be imported by Strava and similar apps."
-                         : "runtil coaches but doesn't save. Use this when another app is recording the run, so Health doesn't end up with two overlapping workouts. Note that Apple Watch only allows one workout at a time — the other app has to be tracking from your phone, not your watch.")
+                         ? "runtil saves this run to Health as a complete workout, so it counts toward your rings and other apps can import it."
+                         : "runtil coaches without saving a workout, so a second app recording the same run doesn't leave two overlapping entries in Health.\n\nYour heart rate is still recorded either way. Holding a workout session is what makes the watch measure heart rate continuously instead of every few minutes, and those readings stay in Health for the other app to pick up.\n\nApple Watch allows only one workout at a time, so the other app has to be tracking from your phone, not your watch.")
                 }
             }
             .navigationTitle("Edit plan")

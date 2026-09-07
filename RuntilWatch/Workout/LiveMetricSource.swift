@@ -150,6 +150,11 @@ final class LiveMetricSource: NSObject, MetricSource {
         } else {
             // Coaching-only: something else is recording this run, so saving here would
             // put a second overlapping workout in Health.
+            //
+            // The heart rate readings survive this. Per HKWorkoutBuilder: "Samples that
+            // were added to the workout will not be deleted." So the other app still gets
+            // the dense heart rate data that only exists because we held a workout
+            // session — outside one, the watch samples every few minutes, not every second.
             builder.discardWorkout()
         }
     }
