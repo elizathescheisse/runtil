@@ -1,0 +1,377 @@
+import Foundation
+
+/// Turns a stream of `Tick`s into a stream of `Cue`s.
+///
+/// Deterministic and self-contained: no clocks, no I/O, no framework imports. The same tick
+/// sequence always produces the same cue sequence, which is what lets a whole run be tested
+/// in milliseconds on a Mac instead of only verified out on the road.
+public final class CueEngine {
+
+    // MARK: Observable state (for the live UI)
+
+    public private(set) var segmentIndex: Int = 0
+    public private(set) var cycle: Int = 0
+    public private(set) var isFinished = false
+    public private(set) var segmentStartElapsed: TimeInterval = 0
+    public private(set) var segmentStartDistance: Double = 0
+    public private(set) var lagObservations: [LagObservation] = []
+
+    /// Heart rate projected forward by your response lag. This is the number the engine
+    /// actually makes decisions on — surfaced so the UI can show it alongside the raw BPM.
+    public private(set) var projectedHeartRate: Int?
+    public private(set) var heartRateSlope: Double = 0   // bpm per second
+    public private(set) var rollingPace: Double?         // seconds per meter
+
+    public let plan: WorkoutPlan
+
+    // MARK: Private state
+
+    private var heartRateHistory: [(elapsed: TimeInterval, bpm: Int)] = []
+    private var paceHistory: [(elapsed: TimeInterval, pace: Double)] = []
+    private var lastCueElapsed: [CueChannel: TimeInterval] = [:]
+    private var ceilingStreak = 0
+    private var floorStreak = 0
+    private var lastSplitIndex = 0
+    private var previousHeartRate: Int?
+    private var emittedCountdowns: Set<Int> = []
+    private var started = false
+
+    /// A transition we're still waiting on a heart-rate response for, used to calibrate lag.
+    private var pendingLagProbe: (at: TimeInterval, from: SegmentKind, to: SegmentKind)?
+
+    /// Cue families that share a cooldown budget.
+    private enum CueChannel: Hashable {
+        case zoneCeiling, zoneFloor, pace, threshold(Int)
+    }
+
+    public init(plan: WorkoutPlan) {
+        self.plan = plan
+    }
+
+    // MARK: - Derived
+
+    public var currentSegment: Segment? {
+        plan.segments.indices.contains(segmentIndex) ? plan.segments[segmentIndex] : nil
+    }
+
+    private var response: HRResponseProfile { plan.hrResponse }
+
+    /// Physiologically plausible ceiling on HR slope. Guards against a sensor glitch
+    /// projecting an absurd heart rate and triggering a spurious transition.
+    private static let maxPlausibleSlope: Double = 0.5   // bpm/sec == 30 bpm/min
+
+    // MARK: - Main entry point
+
+    /// Advance the state machine by one sample. Returns any cues to play, highest priority
+    /// first; callers may take just the first if they can only render one.
+    public func advance(_ tick: Tick) -> [Cue] {
+        guard !isFinished else { return [] }
+
+        var cues: [Cue] = []
+
+        // The very first tick opens the first segment.
+        if !started {
+            started = true
+            segmentStartElapsed = tick.elapsed
+            segmentStartDistance = tick.totalDistance
+            if let segment = currentSegment {
+                cues.append(.beginSegment(kind: segment.kind, index: segmentIndex, cycle: cycle))
+            }
+        }
+
+        ingest(tick)
+
+        guard let segment = currentSegment else {
+            isFinished = true
+            return cues + [.workoutComplete]
+        }
+
+        // A transition supersedes the advisories that describe how you're doing *within*
+        // a segment — pace, HR guard, countdown — so those are skipped entirely.
+        //
+        // Splits are the exception: they still have to be accounted for on this tick, or a
+        // split landing on a boundary would be deferred to the next second and buzz you
+        // twice a second apart. Reported here and dropped by priority downstream instead.
+        if shouldEndSegment(segment, tick: tick) {
+            cues.append(contentsOf: splitCues(tick))
+            cues.append(contentsOf: endSegment(from: segment, tick: tick))
+            previousHeartRate = tick.heartRate
+            return cues.sorted { $0.priority > $1.priority }
+        }
+
+        cues.append(contentsOf: advisories(for: segment, tick: tick))
+        previousHeartRate = tick.heartRate
+        return cues.sorted { $0.priority > $1.priority }
+    }
+
+    // MARK: - Sampling
+
+    private func ingest(_ tick: Tick) {
+        if let bpm = tick.heartRate {
+            heartRateHistory.append((tick.elapsed, bpm))
+            let cutoff = tick.elapsed - response.slopeWindow
+            heartRateHistory.removeAll { $0.elapsed < cutoff }
+            heartRateSlope = Self.slope(of: heartRateHistory)
+            let clamped = min(max(heartRateSlope, -Self.maxPlausibleSlope), Self.maxPlausibleSlope)
+            projectedHeartRate = Int((Double(bpm) + clamped * response.lagSeconds).rounded())
+        }
+
+        if let pace = tick.instantPace, pace.isFinite, pace > 0 {
+            paceHistory.append((tick.elapsed, pace))
+        }
+        let paceWindow = plan.advisories.paceTarget?.window ?? 25
+        paceHistory.removeAll { $0.elapsed < tick.elapsed - paceWindow }
+        rollingPace = paceHistory.isEmpty
+            ? nil
+            : paceHistory.map(\.pace).reduce(0, +) / Double(paceHistory.count)
+
+        observeLagResponse(at: tick.elapsed)
+    }
+
+    /// Least-squares slope in bpm/sec. Regression rather than first-to-last difference
+    /// because two endpoint samples are exactly the ones a sensor glitch corrupts.
+    private static func slope(of samples: [(elapsed: TimeInterval, bpm: Int)]) -> Double {
+        guard samples.count >= 3 else { return 0 }
+        let n = Double(samples.count)
+        let meanX = samples.map(\.elapsed).reduce(0, +) / n
+        let meanY = samples.map { Double($0.bpm) }.reduce(0, +) / n
+        var num = 0.0, den = 0.0
+        for s in samples {
+            let dx = s.elapsed - meanX
+            num += dx * (Double(s.bpm) - meanY)
+            den += dx * dx
+        }
+        guard den > 0 else { return 0 }
+        return num / den
+    }
+
+    // MARK: - Segment transitions
+
+    private func shouldEndSegment(_ segment: Segment, tick: Tick) -> Bool {
+        let inSegment = tick.elapsed - segmentStartElapsed
+        let covered = tick.totalDistance - segmentStartDistance
+        let isHeartRateDriven = segment.end.driveMode == .heartRate
+
+        // Hard ceiling first: a trigger that never fires must not strand the runner.
+        let maxDuration = segment.maxDuration ?? (isHeartRateDriven ? response.maxSegmentDuration : nil)
+        if let maxDuration, inSegment >= maxDuration { return true }
+
+        // Anti-thrash floor. HR-driven segments default to the profile's floor, which
+        // tracks your lag; other modes have no implicit floor.
+        let minDuration = segment.minDuration ?? (isHeartRateDriven ? response.effectiveMinSegmentDuration : 0)
+        guard inSegment >= minDuration else { return false }
+
+        switch segment.end {
+        case .duration(let target):
+            return inSegment >= target
+
+        case .distance(let target):
+            return covered >= target
+
+        // "Run until you get *close* to the top of Zone 2" — hence the margin, and hence
+        // projecting the heart rate forward rather than waiting for it to actually arrive.
+        case .heartRateAtOrAbove(let target):
+            guard let projected = projectedHeartRate else { return false }
+            return projected >= target - response.approachMargin
+
+        case .heartRateAtOrBelow(let target):
+            guard let projected = projectedHeartRate else { return false }
+            return projected <= target + response.approachMargin
+
+        case .manual:
+            return false
+        }
+    }
+
+    /// End the current segment and open the next, wrapping and counting cycles.
+    private func endSegment(from segment: Segment, tick: Tick) -> [Cue] {
+        startLagProbe(leaving: segment, at: tick.elapsed)
+
+        segmentIndex += 1
+        if segmentIndex >= plan.segments.count {
+            segmentIndex = 0
+            cycle += 1
+            if let limit = plan.repeatCount, cycle >= limit {
+                isFinished = true
+                return [.workoutComplete]
+            }
+        }
+
+        segmentStartElapsed = tick.elapsed
+        segmentStartDistance = tick.totalDistance
+        ceilingStreak = 0
+        floorStreak = 0
+        emittedCountdowns.removeAll()
+        if plan.advisories.distanceSplits?.scope == .perSegment { lastSplitIndex = 0 }
+
+        guard let next = currentSegment else {
+            isFinished = true
+            return [.workoutComplete]
+        }
+        return [.beginSegment(kind: next.kind, index: segmentIndex, cycle: cycle)]
+    }
+
+    /// Ends the current segment early on a user tap. Drives `.manual` plans, and lets you
+    /// override any other mode mid-run.
+    public func skipSegment(at elapsed: TimeInterval, totalDistance: Double) -> [Cue] {
+        guard !isFinished, let segment = currentSegment else { return [] }
+        return endSegment(from: segment, tick: Tick(elapsed: elapsed, totalDistance: totalDistance))
+    }
+
+    // MARK: - Advisories
+
+    private func advisories(for segment: Segment, tick: Tick) -> [Cue] {
+        var cues: [Cue] = []
+        let inSegment = tick.elapsed - segmentStartElapsed
+
+        cues.append(contentsOf: countdownCues(segment, inSegment: inSegment))
+        cues.append(contentsOf: heartRateCues(segment, tick: tick))
+        cues.append(contentsOf: thresholdCues(tick))
+        cues.append(contentsOf: paceCues(segment, tick: tick, inSegment: inSegment))
+        cues.append(contentsOf: splitCues(tick))
+        return cues
+    }
+
+    private func countdownCues(_ segment: Segment, inSegment: TimeInterval) -> [Cue] {
+        guard case .duration(let target) = segment.end else { return [] }
+        let remaining = Int((target - inSegment).rounded())
+        guard (1...3).contains(remaining), !emittedCountdowns.contains(remaining) else { return [] }
+        emittedCountdowns.insert(remaining)
+        return [.segmentEndingSoon(seconds: remaining)]
+    }
+
+    private func heartRateCues(_ segment: Segment, tick: Tick) -> [Cue] {
+        guard let guardConfig = plan.advisories.heartRateGuard,
+              let bpm = tick.heartRate,
+              let projected = projectedHeartRate
+        else { return [] }
+
+        // In an HR-driven plan the transition itself already tells you to change effort;
+        // a second buzz saying the same thing would just be noise.
+        guard plan.driveMode != .heartRate else { return [] }
+
+        let zone = plan.zones.range(forZone: guardConfig.zone)
+        var cues: [Cue] = []
+
+        if guardConfig.watchCeiling, segment.kind.isEffort,
+           projected >= zone.upperBound - response.approachMargin {
+            ceilingStreak += 1
+            if ceilingStreak >= response.confirmSamples,
+               passesCooldown(.zoneCeiling, at: tick.elapsed) {
+                mark(.zoneCeiling, at: tick.elapsed)
+                cues.append(.approachingZoneCeiling(bpm: bpm, ceiling: zone.upperBound))
+            }
+        } else {
+            ceilingStreak = 0
+        }
+
+        if guardConfig.watchFloor, !segment.kind.isEffort,
+           projected <= zone.lowerBound + response.approachMargin {
+            floorStreak += 1
+            if floorStreak >= response.confirmSamples,
+               passesCooldown(.zoneFloor, at: tick.elapsed) {
+                mark(.zoneFloor, at: tick.elapsed)
+                cues.append(.approachingZoneFloor(bpm: bpm, floor: zone.lowerBound))
+            }
+        } else {
+            floorStreak = 0
+        }
+
+        return cues
+    }
+
+    private func thresholdCues(_ tick: Tick) -> [Cue] {
+        guard let bpm = tick.heartRate, let previous = previousHeartRate else { return [] }
+        return plan.advisories.thresholdCrossings.compactMap { threshold in
+            let rising = previous < threshold && bpm >= threshold
+            let falling = previous > threshold && bpm <= threshold
+            guard rising || falling, passesCooldown(.threshold(threshold), at: tick.elapsed) else { return nil }
+            mark(.threshold(threshold), at: tick.elapsed)
+            return .thresholdCrossed(bpm: threshold, rising: rising)
+        }
+    }
+
+    private func paceCues(_ segment: Segment, tick: Tick, inSegment: TimeInterval) -> [Cue] {
+        guard let target = plan.advisories.paceTarget,
+              let band = target.bandsByKind[segment.kind],
+              let pace = rollingPace,
+              inSegment >= target.graceAfterSegmentStart,
+              passesCooldown(.pace, at: tick.elapsed)
+        else { return [] }
+
+        // Lower seconds-per-meter means faster.
+        if pace < band.lowerBound {
+            mark(.pace, at: tick.elapsed)
+            return [.paceTooFast(secondsPerMeter: pace)]
+        }
+        if pace > band.upperBound {
+            mark(.pace, at: tick.elapsed)
+            return [.paceTooSlow(secondsPerMeter: pace)]
+        }
+        return []
+    }
+
+    private func splitCues(_ tick: Tick) -> [Cue] {
+        guard let splits = plan.advisories.distanceSplits, splits.everyMeters > 0 else { return [] }
+        let measured = splits.scope == .total
+            ? tick.totalDistance
+            : tick.totalDistance - segmentStartDistance
+        let index = Int(measured / splits.everyMeters)
+        guard index > lastSplitIndex else { return [] }
+        lastSplitIndex = index
+        return [.distanceSplit(index: index, meters: Double(index) * splits.everyMeters)]
+    }
+
+    // MARK: - Cooldowns
+
+    private func passesCooldown(_ channel: CueChannel, at elapsed: TimeInterval) -> Bool {
+        guard let last = lastCueElapsed[channel] else { return true }
+        let window: TimeInterval
+        switch channel {
+        case .pace: window = plan.advisories.paceTarget?.cooldown ?? 30
+        default: window = response.cooldown
+        }
+        return elapsed - last >= window
+    }
+
+    private func mark(_ channel: CueChannel, at elapsed: TimeInterval) {
+        lastCueElapsed[channel] = elapsed
+    }
+
+    // MARK: - Lag self-calibration
+
+    /// Note that effort just changed, so we can time how long the heart takes to answer.
+    private func startLagProbe(leaving segment: Segment, at elapsed: TimeInterval) {
+        let nextIndex = (segmentIndex + 1) % max(plan.segments.count, 1)
+        guard plan.segments.indices.contains(nextIndex) else { return }
+        let next = plan.segments[nextIndex]
+        guard next.kind.isEffort != segment.kind.isEffort else { return }
+        pendingLagProbe = (elapsed, segment.kind, next.kind)
+    }
+
+    /// Watch for the heart rate to turn in the direction the new effort implies. The delay
+    /// between the effort change and that inflection is a direct measurement of your lag.
+    private func observeLagResponse(at elapsed: TimeInterval) {
+        guard let probe = pendingLagProbe else { return }
+
+        // Give up rather than record a bogus outlier if the response never shows.
+        if elapsed - probe.at > 180 {
+            pendingLagProbe = nil
+            return
+        }
+
+        let steppedUp = probe.to.isEffort && heartRateSlope > 0.05
+        let steppedDown = !probe.to.isEffort && heartRateSlope < -0.05
+        guard steppedUp || steppedDown else { return }
+
+        lagObservations.append(
+            LagObservation(
+                effortChangedAt: probe.at,
+                heartRateRespondedAt: elapsed,
+                fromKind: probe.from,
+                toKind: probe.to
+            )
+        )
+        pendingLagProbe = nil
+    }
+}
