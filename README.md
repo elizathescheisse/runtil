@@ -56,6 +56,22 @@ through a sleeve:
 Colliding cues are resolved by priority and *dropped*, never queued — two phrases a second
 apart can't be told apart.
 
+## Starting a run
+
+Three ways in, all from the wrist:
+
+- **The app** — open runtil, tap a plan. Works offline; the watch keeps its own copy of the
+  library, so the phone can stay home.
+- **A watch face complication** — one tap from the face. Available in the circular, corner,
+  inline and rectangular accessory slots.
+- **Siri** — *"Start a run with runtil"*, or name one: *"Start a Zone 2 run with runtil."*
+  Plan names are matched loosely, so "zone two" finds "Zone 2 run/walk".
+
+The complication is a launcher rather than a live readout. Showing the current segment on the
+face would need a shared container between the app and the widget extension, and App Groups
+aren't available under free provisioning — but it would also be redundant, since watchOS
+returns you to the running workout app when you raise your wrist.
+
 ## Layout
 
 ```

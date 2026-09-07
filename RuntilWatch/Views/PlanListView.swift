@@ -8,6 +8,8 @@ struct PlanListView: View {
     @State private var selectedPlan: WorkoutPlan?
     @State private var useSimulation = Self.runningInSimulator
 
+    private var coordinator: LaunchCoordinator { .shared }
+
     /// The simulator has no heart rate sensor and silent haptics, so it defaults to the
     /// scripted source; a real watch always defaults to live data.
     static var runningInSimulator: Bool {
@@ -46,12 +48,45 @@ struct PlanListView: View {
                 .task { await controller.start(plan: plan, simulated: useSimulation) }
         }
         .onAppear(perform: autostartIfRequested)
+        // Siri ("start a Zone 2 run with runtil") and the complication both land here.
+        .onChange(of: coordinator.requestedPlanID) { _, id in
+            guard let id, let match = store.plans.first(where: { $0.id == id }) else { return }
+            selectedPlan = match
+            coordinator.clear()
+        }
+        .onOpenURL { url in
+            guard url.scheme == "runtil" else { return }
+            // A bare runtil://start just opens the list; naming a plan starts it directly.
+            let wanted = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "plan" })?.value
+            if let wanted, let match = store.plans.first(where: {
+                $0.name.lowercased().contains(wanted.lowercased())
+            }) {
+                selectedPlan = match
+            }
+        }
+    }
+
+    private func autostartIfRequested() {
+        // A cold launch from Siri sets the request *before* this view exists, so onChange
+        // never fires for it — the pending request has to be picked up on appear too.
+        if let id = coordinator.requestedPlanID,
+           let match = store.plans.first(where: { $0.id == id }) {
+            selectedPlan = match
+            coordinator.clear()
+            return
+        }
+        if coordinator.requestedPlanList {
+            coordinator.clear()
+        }
+
+        startFromLaunchArguments()
     }
 
     /// Launch with `-autostart <plan name prefix>` to jump straight into a simulated run.
     /// Used to drive the app from the command line for verification, where there's no way
     /// to tap the screen.
-    private func autostartIfRequested() {
+    private func startFromLaunchArguments() {
         let arguments = ProcessInfo.processInfo.arguments
         guard let flagIndex = arguments.firstIndex(of: "-autostart") else { return }
         let wanted = arguments.indices.contains(flagIndex + 1) ? arguments[flagIndex + 1] : ""

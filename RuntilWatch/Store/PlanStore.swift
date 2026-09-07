@@ -17,34 +17,16 @@ final class PlanStore: NSObject {
     private(set) var plans: [WorkoutPlan] = []
     private(set) var lastSyncedAt: Date?
 
-    private let fileURL: URL = {
-        let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        return directory.appendingPathComponent("plans.json")
-    }()
-
     override init() {
         super.init()
-        load()
+        plans = PlanFile.load()
         activateSession()
     }
 
     // MARK: Persistence
 
-    private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([WorkoutPlan].self, from: data),
-              !decoded.isEmpty
-        else {
-            plans = Self.starterPlans
-            return
-        }
-        plans = decoded
-    }
-
     private func save() {
-        guard let data = try? JSONEncoder().encode(plans) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        PlanFile.save(plans)
     }
 
     func replaceAll(with newPlans: [WorkoutPlan]) {
@@ -63,19 +45,6 @@ final class PlanStore: NSObject {
             plans.append(plan)
         }
         save()
-    }
-
-    // MARK: Defaults
-
-    /// Something usable on first launch, before the phone has ever synced.
-    static var starterPlans: [WorkoutPlan] {
-        let zones = HeartRateZones.estimated(age: 35)
-        return [
-            .zoneTwoRunWalk(zones: zones),
-            .timedIntervals(run: 90, walk: 60, zones: zones),
-            .timedIntervals(run: 60, walk: 60, zones: zones),
-            .distanceIntervals(run: 0.5, walk: 0.25, unit: .miles, zones: zones)
-        ]
     }
 
     // MARK: WatchConnectivity

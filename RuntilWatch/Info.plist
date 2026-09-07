@@ -40,5 +40,16 @@
 	<array>
 		<string>watch-companion</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.ergilp.runtil</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>runtil</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
