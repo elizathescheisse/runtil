@@ -73,6 +73,16 @@ struct PlanEditorView: View {
                 }
 
                 AdvisoriesSection(plan: $plan)
+
+                Section {
+                    Toggle("Save run to Health", isOn: $plan.savesToHealth)
+                } header: {
+                    Text("Recording")
+                } footer: {
+                    Text(plan.savesToHealth
+                         ? "runtil saves this run to Health, so it counts toward your rings and can be imported by Strava and similar apps."
+                         : "runtil coaches but doesn't save. Use this when another app is recording the run, so Health doesn't end up with two overlapping workouts. Note that Apple Watch only allows one workout at a time — the other app has to be tracking from your phone, not your watch.")
+                }
             }
             .navigationTitle("Edit plan")
             .navigationBarTitleDisplayMode(.inline)

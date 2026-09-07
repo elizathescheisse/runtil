@@ -35,8 +35,8 @@ struct ActiveWorkoutView: View {
             switch controller.state {
             case .finished:
                 SummaryView(controller: controller, store: store, onDone: close)
-            case .failed(let message):
-                FailureView(message: message, onDone: close)
+            case .failed(let title, let message):
+                FailureView(title: title, message: message, onDone: close)
             default:
                 TabView(selection: $page) {
                     ControlsPage(controller: controller, onEnd: { Task { await controller.finish() } })
@@ -236,19 +236,27 @@ private struct CueLogPage: View {
 // MARK: - Terminal states
 
 private struct FailureView: View {
+    let title: String
     let message: String
     let onDone: () -> Void
 
     var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.title2)
-                .foregroundStyle(.orange)
-            Text(message)
-                .font(.caption)
-                .multilineTextAlignment(.center)
-            Button("OK", action: onDone)
+        ScrollView {
+            VStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.orange)
+                Text(title)
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                Text(message)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Button("OK", action: onDone)
+                    .padding(.top, 2)
+            }
+            .padding(.horizontal, 4)
         }
-        .padding()
     }
 }

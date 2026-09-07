@@ -15,7 +15,7 @@ final class WorkoutController {
         case running
         case paused
         case finished
-        case failed(String)
+        case failed(title: String, message: String)
     }
 
     private(set) var state: State = .idle
@@ -68,7 +68,7 @@ final class WorkoutController {
         self.isSimulated = simulated
         haptics.reset()
 
-        let source: MetricSource
+        var source: MetricSource
         if simulated {
             let simulation = SimulatedMetricSource()
             // Close the loop: the simulated body responds to what the plan is asking for.
@@ -77,14 +77,28 @@ final class WorkoutController {
             }
             source = simulation
         } else {
-            source = LiveMetricSource()
+            source = LiveMetricSource(savesToHealth: plan.savesToHealth)
+        }
+
+        // Another app can seize the watch's single workout session mid-run, which ends
+        // ours — so the failure has to be explained on screen, not swallowed.
+        source.onFailure = { [weak self] failure in
+            Task { @MainActor in
+                self?.state = .failed(title: failure.title, message: failure.message)
+            }
         }
         self.source = source
 
         do {
             try await source.start()
+        } catch let error as LiveMetricSource.SourceError where error == .anotherWorkoutRunning {
+            state = .failed(
+                title: SourceFailure.anotherSessionRunning.title,
+                message: SourceFailure.anotherSessionRunning.message
+            )
+            return
         } catch {
-            state = .failed(error.localizedDescription)
+            state = .failed(title: "Couldn't start", message: error.localizedDescription)
             return
         }
 

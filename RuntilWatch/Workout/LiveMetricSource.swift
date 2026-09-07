@@ -15,14 +15,22 @@ final class LiveMetricSource: NSObject, MetricSource {
     enum SourceError: Error, LocalizedError {
         case healthDataUnavailable
         case authorizationDenied
+        case anotherWorkoutRunning
 
         var errorDescription: String? {
             switch self {
             case .healthDataUnavailable: return "Health data isn't available on this device."
             case .authorizationDenied: return "runtil needs permission to read your heart rate."
+            case .anotherWorkoutRunning: return SourceFailure.anotherSessionRunning.message
             }
         }
     }
+
+    var onFailure: ((SourceFailure) -> Void)?
+
+    /// When false the run is discarded at the end instead of saved, so a second app
+    /// recording the same run doesn't produce a duplicate workout in Health.
+    private let savesToHealth: Bool
 
     private let store = HKHealthStore()
     private var session: HKWorkoutSession?
@@ -41,7 +49,8 @@ final class LiveMetricSource: NSObject, MetricSource {
 
     let ticks: AsyncStream<Tick>
 
-    override init() {
+    init(savesToHealth: Bool = true) {
+        self.savesToHealth = savesToHealth
         var capturedContinuation: AsyncStream<Tick>.Continuation!
         self.ticks = AsyncStream { capturedContinuation = $0 }
         super.init()
@@ -92,7 +101,12 @@ final class LiveMetricSource: NSObject, MetricSource {
         let start = Date()
         startDate = start
         session.startActivity(with: start)
-        try await builder.beginCollection(at: start)
+        do {
+            try await builder.beginCollection(at: start)
+        } catch let error as HKError where error.code == .errorAnotherWorkoutSessionStarted {
+            // Another app already held the session when we tried to start.
+            throw SourceError.anotherWorkoutRunning
+        }
 
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
@@ -131,7 +145,13 @@ final class LiveMetricSource: NSObject, MetricSource {
     func finish() async {
         guard let builder else { return }
         try? await builder.endCollection(at: Date())
-        _ = try? await builder.finishWorkout()
+        if savesToHealth {
+            _ = try? await builder.finishWorkout()
+        } else {
+            // Coaching-only: something else is recording this run, so saving here would
+            // put a second overlapping workout in Health.
+            builder.discardWorkout()
+        }
     }
 }
 
@@ -145,7 +165,16 @@ extension LiveMetricSource: HKWorkoutSessionDelegate {
         date: Date
     ) {}
 
+    /// The conflict usually lands here rather than at `start()`: another app can seize the
+    /// watch's single workout session mid-run, which ends ours.
     func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
+        let failure: SourceFailure
+        if (error as? HKError)?.code == .errorAnotherWorkoutSessionStarted {
+            failure = .anotherSessionRunning
+        } else {
+            failure = .unexpected(error)
+        }
+        onFailure?(failure)
         continuation?.finish()
     }
 }

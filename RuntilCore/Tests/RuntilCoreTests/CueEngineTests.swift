@@ -431,6 +431,36 @@ final class ProfileAndFormatTests: XCTestCase {
         XCTAssertEqual(decoded.hrResponse.lagSeconds, 33)
     }
 
+    func testPlanDecodesWhenNewerFieldsAreMissing() throws {
+        // A library written before a field existed must still load, defaulting the missing
+        // value rather than throwing and wiping every saved plan.
+        let json = """
+        {
+          "id": "5E9B1C1A-0000-4000-8000-000000000001",
+          "name": "Legacy",
+          "driveMode": "time",
+          "segments": [],
+          "zones": { "method": { "direct": { "edges": [100,120,140,160,175,190] } } }
+        }
+        """.data(using: .utf8)!
+
+        let plan = try JSONDecoder().decode(WorkoutPlan.self, from: json)
+        XCTAssertEqual(plan.name, "Legacy")
+        XCTAssertTrue(plan.savesToHealth, "should default to saving")
+        XCTAssertEqual(plan.units, .miles)
+        XCTAssertEqual(plan.hrResponse, .default)
+    }
+
+    func testSavesToHealthSurvivesRoundTrip() throws {
+        var plan = WorkoutPlan.timedIntervals(run: 60, walk: 60, zones: testZones)
+        plan.savesToHealth = false
+        let decoded = try JSONDecoder().decode(
+            WorkoutPlan.self,
+            from: try JSONEncoder().encode(plan)
+        )
+        XCTAssertFalse(decoded.savesToHealth)
+    }
+
     func testPaceFormatting() {
         let nineThirtyPerMile = (9 * 60 + 30) / 1609.344
         XCTAssertEqual(Format.pace(secondsPerMeter: nineThirtyPerMile, unit: .miles), "9:30 /mi")

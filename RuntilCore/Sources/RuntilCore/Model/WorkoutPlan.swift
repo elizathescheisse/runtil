@@ -52,6 +52,14 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
     public var advisories: Advisories
     public var units: DistanceUnit
 
+    /// Whether to save this run to Health as a workout.
+    ///
+    /// Turn it off when something else is recording the run — a phone-based tracker, say.
+    /// runtil still needs its workout session for background haptics, but discards the
+    /// result instead of saving, so Health doesn't end up with two overlapping workouts
+    /// double-counting the same miles and calories.
+    public var savesToHealth: Bool
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -61,8 +69,10 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
         zones: HeartRateZones,
         hrResponse: HRResponseProfile = .default,
         advisories: Advisories = .none,
-        units: DistanceUnit = .miles
+        units: DistanceUnit = .miles,
+        savesToHealth: Bool = true
     ) {
+        self.savesToHealth = savesToHealth
         self.id = id
         self.name = name
         self.driveMode = driveMode
@@ -72,6 +82,22 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
         self.hrResponse = hrResponse
         self.advisories = advisories
         self.units = units
+    }
+
+    /// Decoded by hand so a plan saved before a field existed still loads, defaulting the
+    /// missing value instead of throwing and wiping the library.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        driveMode = try container.decode(DriveMode.self, forKey: .driveMode)
+        segments = try container.decode([Segment].self, forKey: .segments)
+        repeatCount = try container.decodeIfPresent(Int.self, forKey: .repeatCount)
+        zones = try container.decode(HeartRateZones.self, forKey: .zones)
+        hrResponse = try container.decodeIfPresent(HRResponseProfile.self, forKey: .hrResponse) ?? .default
+        advisories = try container.decodeIfPresent(Advisories.self, forKey: .advisories) ?? .none
+        units = try container.decodeIfPresent(DistanceUnit.self, forKey: .units) ?? .miles
+        savesToHealth = try container.decodeIfPresent(Bool.self, forKey: .savesToHealth) ?? true
     }
 
     /// Total planned duration when that's knowable — nil for HR- or distance-driven plans,

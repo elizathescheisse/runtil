@@ -31,6 +31,9 @@ final class SimulatedMetricSource: MetricSource {
     /// simulated body react to the plan rather than ignore it.
     var currentEffortIsRunning: () -> Bool = { true }
 
+    /// Never fires — the simulation has no session to lose.
+    var onFailure: ((SourceFailure) -> Void)?
+
     private let profile: Profile
     private var task: Task<Void, Never>?
     private var continuation: AsyncStream<Tick>.Continuation?
