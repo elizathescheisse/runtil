@@ -1,0 +1,757 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03F15CC3FA4F9E014A90709F /* PlanLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BAC95384914FC2EA73F837 /* PlanLibrary.swift */; };
+		043F6A8F12C37802383FED77 /* RuntilCore in Frameworks */ = {isa = PBXBuildFile; productRef = E339626F5F239D6AC42176DE /* RuntilCore */; };
+		049E4A53680D3BD74F389DE7 /* PlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */; };
+		04A25AC1B738B4C8C1F42780 /* WorkoutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C0C531775CE4E8DA51F196 /* WorkoutController.swift */; };
+		12FB0DF1740895F40EF5763A /* RuntilWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */; };
+		156BC565F1E68BDDBCC80438 /* PlanEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6617399D8914BA4A3FC2D781 /* PlanEditView.swift */; };
+		1970B5B4ACA925551BEE8F8C /* MetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944ACAB8D886C6176D27B6AB /* MetricSource.swift */; };
+		3162BCD643E4036EE9EC4526 /* HapticPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = D63A7DDAC291ACC3EA69131C /* HapticPattern.swift */; };
+		339CF5BDCE9C06FF0E4A625F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DC1968BF34410F191AF49D9 /* Assets.xcassets */; };
+		3CFA555A1EE268C66D869F6B /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */; };
+		53C81091ADC496E0BCC7BB8B /* SimulatedMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA7FA92D9CDD32B690E5BC2 /* SimulatedMetricSource.swift */; };
+		543244636629047527941985 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */; };
+		7F61648D3BF4339F1A9BF0C0 /* PlanEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B2675EE573C64CF256503A /* PlanEditorView.swift */; };
+		83C0DD9DEABC8B0C03807A15 /* RuntilWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		842FC50A2A7F59323456D74B /* RuntilComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593E576FB9AB7B6B5005532B /* RuntilComplication.swift */; };
+		873DFB6ACC164E0DC76AF498 /* RuntilCore in Frameworks */ = {isa = PBXBuildFile; productRef = E630E7339B0CF7B34829D6BE /* RuntilCore */; };
+		89E3FB94E33DA51F0AD004AA /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2556A70DF74AE414458231B /* ActiveWorkoutView.swift */; };
+		8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0038C93211A5142A1C760E /* ZoneEditorView.swift */; };
+		8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946A5C92F48F74168B098DB /* RuntilApp.swift */; };
+		8F6042D22125174D725290BC /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E837BF326D3D3675EF3CB888 /* HistoryView.swift */; };
+		9578770EA4C80B465B612656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4267ADC008F5E77C6C3566F5 /* Assets.xcassets */; };
+		A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */; };
+		A43F2E0C3B4CA5174C6DAE3A /* RuntilWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A9C145A547ACBE2C965853F5 /* StartRunIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79409A51839CC85FB8073C5 /* StartRunIntent.swift */; };
+		C97A7E878B456000259E4836 /* PlanLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */; };
+		DD713777535026738B2D2B61 /* PlanListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D293FD97FF4EBB2E41BADC6B /* PlanListView.swift */; };
+		E59B465D2B04745566AC6D54 /* LiveMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A579684E851BF38336702E /* LiveMetricSource.swift */; };
+		E7EE277BF9FFB8C559AC8733 /* PlanEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD86FE4742FED4907B7F9560 /* PlanEntity.swift */; };
+		F5E4AFBC2C2648CDAC7BFA90 /* PlanFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA7EA12B1E0B30BC1851AA3B /* PlanFile.swift */; };
+		FCBB546C764F7EB594C90228 /* RuntilWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62FA09B698D4DF2926B593A /* RuntilWatchApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1D17C754EBD6D3F1702656A5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 232029787B8729449F5B3831 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 47D6E2D77BCE12AE13EC1C5B;
+			remoteInfo = RuntilWatch;
+		};
+		787B23593965D5FA9701C872 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 232029787B8729449F5B3831 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F960ED0FE3BAC501F951865;
+			remoteInfo = RuntilWatchWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4DE2087101E7B883893D236F /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				83C0DD9DEABC8B0C03807A15 /* RuntilWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B898237F82937747A415F730 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A43F2E0C3B4CA5174C6DAE3A /* RuntilWatchWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RuntilWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStore.swift; sourceTree = "<group>"; };
+		15CD8AC1B818AC8B6321B2A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanLibraryView.swift; sourceTree = "<group>"; };
+		21B2675EE573C64CF256503A /* PlanEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEditorView.swift; sourceTree = "<group>"; };
+		2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuntilWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseProfileEditorView.swift; sourceTree = "<group>"; };
+		3DC1968BF34410F191AF49D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3EA7FA92D9CDD32B690E5BC2 /* SimulatedMetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatedMetricSource.swift; sourceTree = "<group>"; };
+		40C0C531775CE4E8DA51F196 /* WorkoutController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutController.swift; sourceTree = "<group>"; };
+		4267ADC008F5E77C6C3566F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPlayer.swift; sourceTree = "<group>"; };
+		49064794FFA4D51BE2F7E468 /* RuntilWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RuntilWatch.entitlements; sourceTree = "<group>"; };
+		593E576FB9AB7B6B5005532B /* RuntilComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilComplication.swift; sourceTree = "<group>"; };
+		6617399D8914BA4A3FC2D781 /* PlanEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEditView.swift; sourceTree = "<group>"; };
+		66AEA9010EA4FB91123187DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6A7B77DB2EF04EDB1DE934F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7ECEB196599C3A3BD8A1B8F9 /* Runtil.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runtil.entitlements; sourceTree = "<group>"; };
+		900379B492D9A4224C46D847 /* RuntilCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuntilCore; path = RuntilCore; sourceTree = SOURCE_ROOT; };
+		944ACAB8D886C6176D27B6AB /* MetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricSource.swift; sourceTree = "<group>"; };
+		B2556A70DF74AE414458231B /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
+		B2BAC95384914FC2EA73F837 /* PlanLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanLibrary.swift; sourceTree = "<group>"; };
+		C3A579684E851BF38336702E /* LiveMetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMetricSource.swift; sourceTree = "<group>"; };
+		C62FA09B698D4DF2926B593A /* RuntilWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilWatchApp.swift; sourceTree = "<group>"; };
+		C97C6CFB2BF21275ACBEA7CA /* Runtil.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Runtil.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA7EA12B1E0B30BC1851AA3B /* PlanFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanFile.swift; sourceTree = "<group>"; };
+		D293FD97FF4EBB2E41BADC6B /* PlanListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanListView.swift; sourceTree = "<group>"; };
+		D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
+		D63A7DDAC291ACC3EA69131C /* HapticPattern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPattern.swift; sourceTree = "<group>"; };
+		D79409A51839CC85FB8073C5 /* StartRunIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartRunIntent.swift; sourceTree = "<group>"; };
+		D946A5C92F48F74168B098DB /* RuntilApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilApp.swift; sourceTree = "<group>"; };
+		DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilWidgetBundle.swift; sourceTree = "<group>"; };
+		E837BF326D3D3675EF3CB888 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
+		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8461600DC15839C9BCF29821 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				043F6A8F12C37802383FED77 /* RuntilCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C21B71D4CA4C97F744921F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				873DFB6ACC164E0DC76AF498 /* RuntilCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07601D28CDA7F4AD2CD7C285 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				FD86FE4742FED4907B7F9560 /* PlanEntity.swift */,
+				D79409A51839CC85FB8073C5 /* StartRunIntent.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		2D2BB3BFBCE18BC95731D608 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				CA7EA12B1E0B30BC1851AA3B /* PlanFile.swift */,
+				14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		3F030E470535EC70B0FA6C41 /* RuntilWatchWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				6A7B77DB2EF04EDB1DE934F9 /* Info.plist */,
+				593E576FB9AB7B6B5005532B /* RuntilComplication.swift */,
+				DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */,
+			);
+			path = RuntilWatchWidgets;
+			sourceTree = "<group>";
+		};
+		4663FB7524AA4E022B5FA9F4 /* Workout */ = {
+			isa = PBXGroup;
+			children = (
+				C3A579684E851BF38336702E /* LiveMetricSource.swift */,
+				944ACAB8D886C6176D27B6AB /* MetricSource.swift */,
+				3EA7FA92D9CDD32B690E5BC2 /* SimulatedMetricSource.swift */,
+				40C0C531775CE4E8DA51F196 /* WorkoutController.swift */,
+			);
+			path = Workout;
+			sourceTree = "<group>";
+		};
+		5DC81A616A0447AC439C165C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E837BF326D3D3675EF3CB888 /* HistoryView.swift */,
+				21B2675EE573C64CF256503A /* PlanEditorView.swift */,
+				1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */,
+				3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */,
+				FC0038C93211A5142A1C760E /* ZoneEditorView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		685423C1DD6A48343A16CCF2 /* Haptics */ = {
+			isa = PBXGroup;
+			children = (
+				D63A7DDAC291ACC3EA69131C /* HapticPattern.swift */,
+				453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */,
+			);
+			path = Haptics;
+			sourceTree = "<group>";
+		};
+		6DFF7117F81203B5D754140F /* RuntilWatch */ = {
+			isa = PBXGroup;
+			children = (
+				4267ADC008F5E77C6C3566F5 /* Assets.xcassets */,
+				66AEA9010EA4FB91123187DA /* Info.plist */,
+				49064794FFA4D51BE2F7E468 /* RuntilWatch.entitlements */,
+				C62FA09B698D4DF2926B593A /* RuntilWatchApp.swift */,
+				685423C1DD6A48343A16CCF2 /* Haptics */,
+				07601D28CDA7F4AD2CD7C285 /* Intents */,
+				2D2BB3BFBCE18BC95731D608 /* Store */,
+				ED83B9F1AFE9865E209D34CC /* Views */,
+				4663FB7524AA4E022B5FA9F4 /* Workout */,
+			);
+			path = RuntilWatch;
+			sourceTree = "<group>";
+		};
+		7225CE51DFA4F0C064FCBA74 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C97C6CFB2BF21275ACBEA7CA /* Runtil.app */,
+				2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */,
+				03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8C3F6EEEAE54990CCA6639D0 = {
+			isa = PBXGroup;
+			children = (
+				CA6978EF273D678262976B63 /* Packages */,
+				9E8D1B35B062779D0912355F /* Runtil */,
+				6DFF7117F81203B5D754140F /* RuntilWatch */,
+				3F030E470535EC70B0FA6C41 /* RuntilWatchWidgets */,
+				7225CE51DFA4F0C064FCBA74 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9E8D1B35B062779D0912355F /* Runtil */ = {
+			isa = PBXGroup;
+			children = (
+				3DC1968BF34410F191AF49D9 /* Assets.xcassets */,
+				15CD8AC1B818AC8B6321B2A9 /* Info.plist */,
+				7ECEB196599C3A3BD8A1B8F9 /* Runtil.entitlements */,
+				D946A5C92F48F74168B098DB /* RuntilApp.swift */,
+				D04755159B8AAC7920CCC6FC /* Store */,
+				5DC81A616A0447AC439C165C /* Views */,
+			);
+			path = Runtil;
+			sourceTree = "<group>";
+		};
+		CA6978EF273D678262976B63 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				900379B492D9A4224C46D847 /* RuntilCore */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		D04755159B8AAC7920CCC6FC /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				B2BAC95384914FC2EA73F837 /* PlanLibrary.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		ED83B9F1AFE9865E209D34CC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B2556A70DF74AE414458231B /* ActiveWorkoutView.swift */,
+				6617399D8914BA4A3FC2D781 /* PlanEditView.swift */,
+				D293FD97FF4EBB2E41BADC6B /* PlanListView.swift */,
+				D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		47D6E2D77BCE12AE13EC1C5B /* RuntilWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85AD36DD5B2AB0A4C03E2E82 /* Build configuration list for PBXNativeTarget "RuntilWatch" */;
+			buildPhases = (
+				EFDA6AEB5BE845EC4B77F9AB /* Sources */,
+				12AF3000C3078760F7D84C86 /* Resources */,
+				9C21B71D4CA4C97F744921F7 /* Frameworks */,
+				B898237F82937747A415F730 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				76879BC69EDCDE45230DBFDA /* PBXTargetDependency */,
+			);
+			name = RuntilWatch;
+			packageProductDependencies = (
+				E630E7339B0CF7B34829D6BE /* RuntilCore */,
+			);
+			productName = RuntilWatch;
+			productReference = 2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8F960ED0FE3BAC501F951865 /* RuntilWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E42B8F89FA3507DB0FEF9F9D /* Build configuration list for PBXNativeTarget "RuntilWatchWidgets" */;
+			buildPhases = (
+				12DD7769173856C997999ADF /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RuntilWatchWidgets;
+			packageProductDependencies = (
+			);
+			productName = RuntilWatchWidgets;
+			productReference = 03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		C75ADF53E155B5C229789EE1 /* Runtil */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 05B9FCF2E932DA7BC178F275 /* Build configuration list for PBXNativeTarget "Runtil" */;
+			buildPhases = (
+				0BB742F6F8D4B766716BA242 /* Sources */,
+				976401EE5A2DECE636CBC263 /* Resources */,
+				8461600DC15839C9BCF29821 /* Frameworks */,
+				4DE2087101E7B883893D236F /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				210139E8D73C5801FF9EBE4C /* PBXTargetDependency */,
+			);
+			name = Runtil;
+			packageProductDependencies = (
+				E339626F5F239D6AC42176DE /* RuntilCore */,
+			);
+			productName = Runtil;
+			productReference = C97C6CFB2BF21275ACBEA7CA /* Runtil.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		232029787B8729449F5B3831 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					47D6E2D77BCE12AE13EC1C5B = {
+						ProvisioningStyle = Automatic;
+					};
+					8F960ED0FE3BAC501F951865 = {
+						ProvisioningStyle = Automatic;
+					};
+					C75ADF53E155B5C229789EE1 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 32CA7FB7FF400D27A9879965 /* Build configuration list for PBXProject "Runtil" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8C3F6EEEAE54990CCA6639D0;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1BA53C2D1EFF930F82E5AA16 /* XCLocalSwiftPackageReference "RuntilCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7225CE51DFA4F0C064FCBA74 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C75ADF53E155B5C229789EE1 /* Runtil */,
+				47D6E2D77BCE12AE13EC1C5B /* RuntilWatch */,
+				8F960ED0FE3BAC501F951865 /* RuntilWatchWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		12AF3000C3078760F7D84C86 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9578770EA4C80B465B612656 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		976401EE5A2DECE636CBC263 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				339CF5BDCE9C06FF0E4A625F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0BB742F6F8D4B766716BA242 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8F6042D22125174D725290BC /* HistoryView.swift in Sources */,
+				7F61648D3BF4339F1A9BF0C0 /* PlanEditorView.swift in Sources */,
+				03F15CC3FA4F9E014A90709F /* PlanLibrary.swift in Sources */,
+				C97A7E878B456000259E4836 /* PlanLibraryView.swift in Sources */,
+				A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */,
+				8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */,
+				8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		12DD7769173856C997999ADF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				842FC50A2A7F59323456D74B /* RuntilComplication.swift in Sources */,
+				12FB0DF1740895F40EF5763A /* RuntilWidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFDA6AEB5BE845EC4B77F9AB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				89E3FB94E33DA51F0AD004AA /* ActiveWorkoutView.swift in Sources */,
+				3162BCD643E4036EE9EC4526 /* HapticPattern.swift in Sources */,
+				3CFA555A1EE268C66D869F6B /* HapticPlayer.swift in Sources */,
+				E59B465D2B04745566AC6D54 /* LiveMetricSource.swift in Sources */,
+				1970B5B4ACA925551BEE8F8C /* MetricSource.swift in Sources */,
+				156BC565F1E68BDDBCC80438 /* PlanEditView.swift in Sources */,
+				E7EE277BF9FFB8C559AC8733 /* PlanEntity.swift in Sources */,
+				F5E4AFBC2C2648CDAC7BFA90 /* PlanFile.swift in Sources */,
+				DD713777535026738B2D2B61 /* PlanListView.swift in Sources */,
+				049E4A53680D3BD74F389DE7 /* PlanStore.swift in Sources */,
+				FCBB546C764F7EB594C90228 /* RuntilWatchApp.swift in Sources */,
+				53C81091ADC496E0BCC7BB8B /* SimulatedMetricSource.swift in Sources */,
+				A9C145A547ACBE2C965853F5 /* StartRunIntent.swift in Sources */,
+				543244636629047527941985 /* SummaryView.swift in Sources */,
+				04A25AC1B738B4C8C1F42780 /* WorkoutController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		210139E8D73C5801FF9EBE4C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 47D6E2D77BCE12AE13EC1C5B /* RuntilWatch */;
+			targetProxy = 1D17C754EBD6D3F1702656A5 /* PBXContainerItemProxy */;
+		};
+		76879BC69EDCDE45230DBFDA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F960ED0FE3BAC501F951865 /* RuntilWatchWidgets */;
+			targetProxy = 787B23593965D5FA9701C872 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		06381E7973E3D17B6393524F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = RuntilWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil.watchkitapp.widgets;
+				PRODUCT_NAME = RuntilWatchWidgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = NO;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		18D1965A601922597967EC3C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = RuntilWatch/RuntilWatch.entitlements;
+				INFOPLIST_FILE = RuntilWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil.watchkitapp;
+				PRODUCT_NAME = runtil;
+				SDKROOT = watchos;
+				SKIP_INSTALL = NO;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		3427D6FE32EC695648C53188 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		55DB5B6B2BF1130B16B4703D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = RuntilWatch/RuntilWatch.entitlements;
+				INFOPLIST_FILE = RuntilWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil.watchkitapp;
+				PRODUCT_NAME = runtil;
+				SDKROOT = watchos;
+				SKIP_INSTALL = NO;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		57997AA695CB7FAFA32CE3E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = RuntilWatchWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil.watchkitapp.widgets;
+				PRODUCT_NAME = RuntilWatchWidgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = NO;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		724ADBBB1978FE48658BBFAD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Runtil/Runtil.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Runtil/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil;
+				PRODUCT_NAME = runtil;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		D2BDFE00C15AB02FE8D93B44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Runtil/Runtil.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Runtil/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil;
+				PRODUCT_NAME = runtil;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		05B9FCF2E932DA7BC178F275 /* Build configuration list for PBXNativeTarget "Runtil" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				724ADBBB1978FE48658BBFAD /* Debug */,
+				D2BDFE00C15AB02FE8D93B44 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		32CA7FB7FF400D27A9879965 /* Build configuration list for PBXProject "Runtil" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3427D6FE32EC695648C53188 /* Debug */,
+				B1A6786C4F3763ED5BFBCA00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		85AD36DD5B2AB0A4C03E2E82 /* Build configuration list for PBXNativeTarget "RuntilWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18D1965A601922597967EC3C /* Debug */,
+				55DB5B6B2BF1130B16B4703D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E42B8F89FA3507DB0FEF9F9D /* Build configuration list for PBXNativeTarget "RuntilWatchWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06381E7973E3D17B6393524F /* Debug */,
+				57997AA695CB7FAFA32CE3E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		1BA53C2D1EFF930F82E5AA16 /* XCLocalSwiftPackageReference "RuntilCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = RuntilCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E339626F5F239D6AC42176DE /* RuntilCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuntilCore;
+		};
+		E630E7339B0CF7B34829D6BE /* RuntilCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuntilCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 232029787B8729449F5B3831 /* Project object */;
+}

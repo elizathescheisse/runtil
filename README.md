@@ -105,9 +105,14 @@ PLAN="1:30" PAGE=log make run-watch   # jump straight into a plan and watch the 
 
 ## Installing on your watch
 
-Open `Runtil.xcodeproj` (run `make project` first), set your team on both targets, and run to
-your watch. On a free personal team the app expires after 7 days and needs reinstalling;
-HealthKit and background workouts work fine either way.
+Open `Runtil.xcodeproj`, set your development team on all three targets (`Runtil`,
+`RuntilWatch`, `RuntilWatchWidgets`), and run to your watch. On a free personal team the app
+expires after 7 days and needs reinstalling; HealthKit and background workouts work fine
+either way.
+
+The project file is committed, so it opens directly. It's still generated from `project.yml`
+by [XcodeGen](https://github.com/yonaskolb/XcodeGen) — `make project` regenerates it after
+changing targets or build settings, which also overwrites anything set through Xcode's UI.
 
 Grant Health and Location permissions on first launch. Start with a timed plan — you know
 exactly when each buzz should land, which makes it easy to tell whether things are working

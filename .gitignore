@@ -1,9 +1,10 @@
 .DS_Store
 .build/
 DerivedData/
-*.xcodeproj
-*.xcworkspace
-!*.xcodeproj/project.xcworkspace
 .swiftpm/
+
+# Per-machine Xcode state: open tabs, breakpoints, window layout. Nothing another
+# checkout would want, and it changes constantly.
 xcuserdata/
 *.xcuserstate
+*.xcscmblueprint
