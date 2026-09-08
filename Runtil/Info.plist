@@ -28,6 +28,18 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<!-- Keeps the app alive once the screen locks: location for distance and pace,
+		     audio so the cues still reach you with the phone in a pocket. -->
+		<string>location</string>
+		<string>audio</string>
+		<string>bluetooth-central</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>runtil uses GPS to measure your distance and pace so it can cue you through intervals and call out splits.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>runtil connects to a Bluetooth heart rate strap so it can cue you by heart rate without an Apple Watch.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>runtil reads your completed runs from Health to show your history and measure how quickly your heart rate responds to effort.</string>
 	<key>NSHealthUpdateUsageDescription</key>

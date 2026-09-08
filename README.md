@@ -1,7 +1,7 @@
 # runtil
 
-Haptic run coaching for Apple Watch. Taps your wrist when it's time to change what you're
-doing — so you can run without looking at anything.
+Run coaching that tells you when to change what you're doing — so you can run without looking
+at anything. Taps your wrist on Apple Watch, or talks to you on iPhone if you don't have one.
 
 ## The idea
 
@@ -72,15 +72,40 @@ face would need a shared container between the app and the widget extension, and
 aren't available under free provisioning — but it would also be redundant, since watchOS
 returns you to the running workout app when you raise your wrist.
 
+## Running without an Apple Watch
+
+The phone runs plans on its own. Distance and pace come from GPS; heart rate needs a
+Bluetooth chest strap.
+
+**Cues are audio-first here, and that's deliberate.** iOS documents
+`CHHapticEngineStoppedReasonApplicationSuspended` as the engine stopping when the app is
+"put into the background", so background vibration is unreliable — and a buzz through a
+zipped pocket is easy to miss regardless. Segment changes are spoken ("Run", "Walk");
+pace nudges are tones, rising or falling to match the watch's haptic rhythm. Music ducks
+rather than stops. Vibration plays too, and works well whenever the phone is in your hand.
+
+**Heart rate straps** use the standard Bluetooth Heart Rate Service (0x180D), so any strap
+works — Polar, Garmin, Wahoo, Coospo — with no vendor SDK. A strap also reads more
+accurately than a wrist sensor while running. Without one, time, distance and pace plans
+work fine and heart-rate plans are shown as unavailable rather than failing halfway.
+
+The run survives a locked screen via background location, which is what keeps the app alive
+at all once the display sleeps.
+
 ## Layout
 
 ```
 RuntilCore/     Pure Swift: model + cue engine + tests. Imports only Foundation,
-                so the whole engine tests on a Mac in ~0.1s.
-RuntilWatch/    The brain. HKWorkoutSession, CoreLocation, haptics, live UI.
-Runtil/         Plan editor, zone editor, response tuning, history. Syncs over
-                WatchConnectivity.
+                so the whole engine tests on a Mac in ~0.15s.
+RuntilWatch/    Watch app. HKWorkoutSession, CoreLocation, haptics, complication,
+                Siri intents.
+Runtil/         Phone app. Plan and zone editors, history, WatchConnectivity sync,
+                and a standalone run mode with audio cues and BLE strap support.
 ```
+
+Both apps drive the same `CueEngine`. It imports nothing but Foundation and has no idea
+which device it is on — only the sensors and the cue output differ. That is why adding the
+phone version needed no changes to the interval logic at all.
 
 The workout session isn't incidental — it's what earns background runtime, and the reason
 haptics reach your wrist with the screen off. It also puts the run in Fitness for free.

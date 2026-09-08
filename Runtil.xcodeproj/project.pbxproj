@@ -11,19 +11,26 @@
 		043F6A8F12C37802383FED77 /* RuntilCore in Frameworks */ = {isa = PBXBuildFile; productRef = E339626F5F239D6AC42176DE /* RuntilCore */; };
 		049E4A53680D3BD74F389DE7 /* PlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */; };
 		04A25AC1B738B4C8C1F42780 /* WorkoutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C0C531775CE4E8DA51F196 /* WorkoutController.swift */; };
+		08B6D6733BF888B4AB9A36D5 /* PhoneMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BDF3BEF5348BA33D0F6BD6 /* PhoneMetricSource.swift */; };
 		12FB0DF1740895F40EF5763A /* RuntilWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */; };
 		156BC565F1E68BDDBCC80438 /* PlanEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6617399D8914BA4A3FC2D781 /* PlanEditView.swift */; };
+		16DDA85CA31CC334287FB621 /* AudioCuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DFF3FE46FF2006EBA895E6 /* AudioCuePlayer.swift */; };
 		1970B5B4ACA925551BEE8F8C /* MetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944ACAB8D886C6176D27B6AB /* MetricSource.swift */; };
 		3162BCD643E4036EE9EC4526 /* HapticPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = D63A7DDAC291ACC3EA69131C /* HapticPattern.swift */; };
 		339CF5BDCE9C06FF0E4A625F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DC1968BF34410F191AF49D9 /* Assets.xcassets */; };
 		3CFA555A1EE268C66D869F6B /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */; };
+		3E786DE75C4B29F24E8C149D /* PhoneRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19032F4F78EBD6799732D36A /* PhoneRunView.swift */; };
+		406402AE1C6A6E9E5639E36D /* PhoneCuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0C10F8CCEFB6908EDBE72B /* PhoneCuePlayer.swift */; };
+		47E72BB2DAC84B7F0E162193 /* HeartRateStrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378A778C00073711211B963E /* HeartRateStrap.swift */; };
 		53C81091ADC496E0BCC7BB8B /* SimulatedMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA7FA92D9CDD32B690E5BC2 /* SimulatedMetricSource.swift */; };
 		543244636629047527941985 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */; };
+		72BA133DF3F7FDEB36BD65E3 /* PhoneWorkoutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF565E880E1FEA1A7313A386 /* PhoneWorkoutController.swift */; };
 		7F61648D3BF4339F1A9BF0C0 /* PlanEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B2675EE573C64CF256503A /* PlanEditorView.swift */; };
 		83C0DD9DEABC8B0C03807A15 /* RuntilWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		842FC50A2A7F59323456D74B /* RuntilComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593E576FB9AB7B6B5005532B /* RuntilComplication.swift */; };
 		873DFB6ACC164E0DC76AF498 /* RuntilCore in Frameworks */ = {isa = PBXBuildFile; productRef = E630E7339B0CF7B34829D6BE /* RuntilCore */; };
 		89E3FB94E33DA51F0AD004AA /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2556A70DF74AE414458231B /* ActiveWorkoutView.swift */; };
+		8B1C346505BFE6366CBF73F9 /* StrapSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 736F134206226E48DAA2E2BB /* StrapSettingsView.swift */; };
 		8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0038C93211A5142A1C760E /* ZoneEditorView.swift */; };
 		8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946A5C92F48F74168B098DB /* RuntilApp.swift */; };
 		8F6042D22125174D725290BC /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E837BF326D3D3675EF3CB888 /* HistoryView.swift */; };
@@ -85,9 +92,12 @@
 		03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RuntilWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStore.swift; sourceTree = "<group>"; };
 		15CD8AC1B818AC8B6321B2A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		19032F4F78EBD6799732D36A /* PhoneRunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneRunView.swift; sourceTree = "<group>"; };
 		1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanLibraryView.swift; sourceTree = "<group>"; };
 		21B2675EE573C64CF256503A /* PlanEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEditorView.swift; sourceTree = "<group>"; };
+		2A0C10F8CCEFB6908EDBE72B /* PhoneCuePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCuePlayer.swift; sourceTree = "<group>"; };
 		2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuntilWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		378A778C00073711211B963E /* HeartRateStrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateStrap.swift; sourceTree = "<group>"; };
 		3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseProfileEditorView.swift; sourceTree = "<group>"; };
 		3DC1968BF34410F191AF49D9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3EA7FA92D9CDD32B690E5BC2 /* SimulatedMetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatedMetricSource.swift; sourceTree = "<group>"; };
@@ -96,18 +106,22 @@
 		453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPlayer.swift; sourceTree = "<group>"; };
 		49064794FFA4D51BE2F7E468 /* RuntilWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RuntilWatch.entitlements; sourceTree = "<group>"; };
 		593E576FB9AB7B6B5005532B /* RuntilComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilComplication.swift; sourceTree = "<group>"; };
+		64DFF3FE46FF2006EBA895E6 /* AudioCuePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCuePlayer.swift; sourceTree = "<group>"; };
 		6617399D8914BA4A3FC2D781 /* PlanEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEditView.swift; sourceTree = "<group>"; };
 		66AEA9010EA4FB91123187DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6A7B77DB2EF04EDB1DE934F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		736F134206226E48DAA2E2BB /* StrapSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrapSettingsView.swift; sourceTree = "<group>"; };
 		7ECEB196599C3A3BD8A1B8F9 /* Runtil.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runtil.entitlements; sourceTree = "<group>"; };
 		900379B492D9A4224C46D847 /* RuntilCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuntilCore; path = RuntilCore; sourceTree = SOURCE_ROOT; };
 		944ACAB8D886C6176D27B6AB /* MetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricSource.swift; sourceTree = "<group>"; };
 		B2556A70DF74AE414458231B /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
 		B2BAC95384914FC2EA73F837 /* PlanLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanLibrary.swift; sourceTree = "<group>"; };
+		B7BDF3BEF5348BA33D0F6BD6 /* PhoneMetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneMetricSource.swift; sourceTree = "<group>"; };
 		C3A579684E851BF38336702E /* LiveMetricSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMetricSource.swift; sourceTree = "<group>"; };
 		C62FA09B698D4DF2926B593A /* RuntilWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilWatchApp.swift; sourceTree = "<group>"; };
 		C97C6CFB2BF21275ACBEA7CA /* Runtil.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Runtil.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA7EA12B1E0B30BC1851AA3B /* PlanFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanFile.swift; sourceTree = "<group>"; };
+		CF565E880E1FEA1A7313A386 /* PhoneWorkoutController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWorkoutController.swift; sourceTree = "<group>"; };
 		D293FD97FF4EBB2E41BADC6B /* PlanListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanListView.swift; sourceTree = "<group>"; };
 		D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
 		D63A7DDAC291ACC3EA69131C /* HapticPattern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPattern.swift; sourceTree = "<group>"; };
@@ -178,13 +192,24 @@
 			path = Workout;
 			sourceTree = "<group>";
 		};
+		50B6B5F5F7B295CFF7F8D698 /* Cues */ = {
+			isa = PBXGroup;
+			children = (
+				64DFF3FE46FF2006EBA895E6 /* AudioCuePlayer.swift */,
+				2A0C10F8CCEFB6908EDBE72B /* PhoneCuePlayer.swift */,
+			);
+			path = Cues;
+			sourceTree = "<group>";
+		};
 		5DC81A616A0447AC439C165C /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				E837BF326D3D3675EF3CB888 /* HistoryView.swift */,
+				19032F4F78EBD6799732D36A /* PhoneRunView.swift */,
 				21B2675EE573C64CF256503A /* PlanEditorView.swift */,
 				1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */,
 				3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */,
+				736F134206226E48DAA2E2BB /* StrapSettingsView.swift */,
 				FC0038C93211A5142A1C760E /* ZoneEditorView.swift */,
 			);
 			path = Views;
@@ -243,8 +268,10 @@
 				15CD8AC1B818AC8B6321B2A9 /* Info.plist */,
 				7ECEB196599C3A3BD8A1B8F9 /* Runtil.entitlements */,
 				D946A5C92F48F74168B098DB /* RuntilApp.swift */,
+				50B6B5F5F7B295CFF7F8D698 /* Cues */,
 				D04755159B8AAC7920CCC6FC /* Store */,
 				5DC81A616A0447AC439C165C /* Views */,
+				FA5BCB2D268AFE16C9968DDD /* Workout */,
 			);
 			path = Runtil;
 			sourceTree = "<group>";
@@ -274,6 +301,16 @@
 				D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		FA5BCB2D268AFE16C9968DDD /* Workout */ = {
+			isa = PBXGroup;
+			children = (
+				378A778C00073711211B963E /* HeartRateStrap.swift */,
+				B7BDF3BEF5348BA33D0F6BD6 /* PhoneMetricSource.swift */,
+				CF565E880E1FEA1A7313A386 /* PhoneWorkoutController.swift */,
+			);
+			path = Workout;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -408,12 +445,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16DDA85CA31CC334287FB621 /* AudioCuePlayer.swift in Sources */,
+				47E72BB2DAC84B7F0E162193 /* HeartRateStrap.swift in Sources */,
 				8F6042D22125174D725290BC /* HistoryView.swift in Sources */,
+				406402AE1C6A6E9E5639E36D /* PhoneCuePlayer.swift in Sources */,
+				08B6D6733BF888B4AB9A36D5 /* PhoneMetricSource.swift in Sources */,
+				3E786DE75C4B29F24E8C149D /* PhoneRunView.swift in Sources */,
+				72BA133DF3F7FDEB36BD65E3 /* PhoneWorkoutController.swift in Sources */,
 				7F61648D3BF4339F1A9BF0C0 /* PlanEditorView.swift in Sources */,
 				03F15CC3FA4F9E014A90709F /* PlanLibrary.swift in Sources */,
 				C97A7E878B456000259E4836 /* PlanLibraryView.swift in Sources */,
 				A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */,
 				8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */,
+				8B1C346505BFE6366CBF73F9 /* StrapSettingsView.swift in Sources */,
 				8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

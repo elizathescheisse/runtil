@@ -370,6 +370,52 @@ final class LagCalibrationTests: XCTestCase {
     }
 }
 
+final class HeartRateMeasurementTests: XCTestCase {
+
+    func testEightBitValue() {
+        // flags 0x00: 8-bit value, contact not supported.
+        let reading = HeartRateMeasurement.parse([0x00, 0x8A])
+        XCTAssertEqual(reading?.bpm, 138)
+        XCTAssertFalse(reading?.isPoorContact ?? true)
+    }
+
+    func testSixteenBitValueIsLittleEndian() {
+        // flags 0x01: 16-bit. 0x008A little-endian is 138, not 0x8A00.
+        XCTAssertEqual(HeartRateMeasurement.parse([0x01, 0x8A, 0x00])?.bpm, 138)
+    }
+
+    func testEightBitPacketIsNotMisreadAsSixteen() {
+        // The bug this guards: assuming a width instead of reading the flag. An 8-bit
+        // packet read as 16-bit would pull in whatever byte follows.
+        let eight = HeartRateMeasurement.parse([0x00, 0x64, 0xFF])
+        XCTAssertEqual(eight?.bpm, 100, "must stop after one byte when the flag says 8-bit")
+    }
+
+    func testPoorContactOnlyWhenSupportedAndAbsent() {
+        // 0x04 = contact supported, bit 1 clear = no contact detected.
+        XCTAssertTrue(HeartRateMeasurement.parse([0x04, 0x8A])?.isPoorContact ?? false)
+        // 0x06 = supported and detected.
+        XCTAssertFalse(HeartRateMeasurement.parse([0x06, 0x8A])?.isPoorContact ?? true)
+        // 0x00 = can't tell. A strap that doesn't report contact must not look fallen off.
+        XCTAssertFalse(HeartRateMeasurement.parse([0x00, 0x8A])?.isPoorContact ?? true)
+    }
+
+    func testRejectsMalformedAndImpossiblePackets() {
+        XCTAssertNil(HeartRateMeasurement.parse([]), "empty")
+        XCTAssertNil(HeartRateMeasurement.parse([0x00]), "flags only")
+        XCTAssertNil(HeartRateMeasurement.parse([0x01, 0x8A]), "16-bit flag, one byte")
+        XCTAssertNil(HeartRateMeasurement.parse([0x00, 0x00]), "0 bpm")
+        XCTAssertNil(HeartRateMeasurement.parse([0x01, 0xFF, 0xFF]), "65535 bpm")
+    }
+
+    func testIgnoresTrailingOptionalFields() {
+        // Straps often append energy expended and RR intervals; the heart rate is still
+        // the leading field and must parse regardless of what follows.
+        let withExtras = HeartRateMeasurement.parse([0x18, 0x8A, 0x10, 0x00, 0x2C, 0x01])
+        XCTAssertEqual(withExtras?.bpm, 138)
+    }
+}
+
 final class PlanMergeTests: XCTestCase {
 
     private func plan(_ name: String, id: UUID, modified: Date) -> WorkoutPlan {
