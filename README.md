@@ -112,3 +112,11 @@ HealthKit and background workouts work fine either way.
 Grant Health and Location permissions on first launch. Start with a timed plan — you know
 exactly when each buzz should land, which makes it easy to tell whether things are working
 before trusting the heart-rate logic.
+
+## License
+
+© 2026 Eliza Gilpin. All rights reserved.
+
+The source is public to read, but no open-source license is granted yet — that decision is
+still open. If you'd like to use or build on any of this, ask.
+
