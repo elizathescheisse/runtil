@@ -6,6 +6,7 @@ struct PlanListView: View {
     let controller: WorkoutController
 
     @State private var selectedPlan: WorkoutPlan?
+    @State private var editingPlan: WorkoutPlan?
     @State private var useSimulation = Self.runningInSimulator
 
     private var coordinator: LaunchCoordinator { .shared }
@@ -29,9 +30,22 @@ struct PlanListView: View {
                     } label: {
                         PlanRow(plan: plan)
                     }
+                    // Tap still starts immediately — that's the common case and it stays
+                    // one tap. Adjusting is a swipe away rather than an extra step.
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            editingPlan = plan
+                        } label: {
+                            Label("Adjust", systemImage: "slider.horizontal.3")
+                        }
+                        .tint(.blue)
+                    }
                 }
             } header: {
                 Text("Plans")
+            } footer: {
+                Text("Tap to start · swipe left to adjust")
+                    .font(.system(size: 11))
             }
 
             if Self.runningInSimulator {
@@ -46,6 +60,14 @@ struct PlanListView: View {
         .fullScreenCover(item: $selectedPlan) { plan in
             ActiveWorkoutView(controller: controller, store: store)
                 .task { await controller.start(plan: plan, simulated: useSimulation) }
+        }
+        .sheet(item: $editingPlan) { plan in
+            NavigationStack {
+                PlanEditView(plan: plan, store: store) { edited in
+                    editingPlan = nil
+                    selectedPlan = edited
+                }
+            }
         }
         .onAppear(perform: autostartIfRequested)
         // Siri ("start a Zone 2 run with runtil") and the complication both land here.
@@ -88,14 +110,26 @@ struct PlanListView: View {
     /// to tap the screen.
     private func startFromLaunchArguments() {
         let arguments = ProcessInfo.processInfo.arguments
+
+        // `-edit <name>` opens the adjust screen, for driving the app from the command
+        // line where there's no way to swipe.
+        if let flagIndex = arguments.firstIndex(of: "-edit"),
+           arguments.indices.contains(flagIndex + 1),
+           let match = named(arguments[flagIndex + 1]) {
+            editingPlan = match
+            return
+        }
+
         guard let flagIndex = arguments.firstIndex(of: "-autostart") else { return }
         let wanted = arguments.indices.contains(flagIndex + 1) ? arguments[flagIndex + 1] : ""
-        let match = wanted.isEmpty
-            ? store.plans.first
-            : store.plans.first { $0.name.lowercased().hasPrefix(wanted.lowercased()) }
+        let match = wanted.isEmpty ? store.plans.first : named(wanted)
         guard let match else { return }
         useSimulation = true
         selectedPlan = match
+    }
+
+    private func named(_ prefix: String) -> WorkoutPlan? {
+        store.plans.first { $0.name.lowercased().hasPrefix(prefix.lowercased()) }
     }
 }
 

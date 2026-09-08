@@ -370,6 +370,84 @@ final class LagCalibrationTests: XCTestCase {
     }
 }
 
+final class PlanMergeTests: XCTestCase {
+
+    private func plan(_ name: String, id: UUID, modified: Date) -> WorkoutPlan {
+        var p = WorkoutPlan.timedIntervals(run: 60, walk: 60, zones: testZones)
+        p.id = id
+        p.name = name
+        p.modifiedAt = modified
+        return p
+    }
+
+    func testWristEditSurvivesAPhonePush() {
+        // The whole point: a tweak made on the watch must not be silently overwritten by
+        // the phone's next sync.
+        let id = UUID()
+        let now = Date()
+        let onWatch = plan("Edited on wrist", id: id, modified: now)
+        let onPhone = plan("Stale", id: id, modified: now.addingTimeInterval(-600))
+
+        let merged = PlanMerge.merge(incoming: [onPhone], local: [onWatch])
+        XCTAssertEqual(merged.map(\.name), ["Edited on wrist"])
+    }
+
+    func testNewerPhoneEditWins() {
+        let id = UUID()
+        let now = Date()
+        let onWatch = plan("Old wrist edit", id: id, modified: now.addingTimeInterval(-600))
+        let onPhone = plan("Fresh from phone", id: id, modified: now)
+
+        let merged = PlanMerge.merge(incoming: [onPhone], local: [onWatch])
+        XCTAssertEqual(merged.map(\.name), ["Fresh from phone"])
+    }
+
+    func testPhoneDeletionsPropagate() {
+        // The phone owns the library, so a plan it no longer lists should disappear even
+        // if the watch still has a copy.
+        let keep = plan("Keep", id: UUID(), modified: Date())
+        let deleted = plan("Deleted on phone", id: UUID(), modified: Date())
+
+        let merged = PlanMerge.merge(incoming: [keep], local: [keep, deleted])
+        XCTAssertEqual(merged.map(\.name), ["Keep"])
+    }
+
+    func testNewPhonePlansArrive() {
+        let existing = plan("Existing", id: UUID(), modified: Date())
+        let fresh = plan("Brand new", id: UUID(), modified: Date())
+
+        let merged = PlanMerge.merge(incoming: [existing, fresh], local: [existing])
+        XCTAssertEqual(merged.count, 2)
+        XCTAssertTrue(merged.contains { $0.name == "Brand new" })
+    }
+
+    func testEmptyPushDoesNotWipeTheWatch() {
+        // A failed encode or a first-run race must not read as "delete everything".
+        let mine = plan("Mine", id: UUID(), modified: Date())
+        XCTAssertEqual(PlanMerge.merge(incoming: [], local: [mine]).map(\.name), ["Mine"])
+    }
+
+    func testLegacyPlanWithoutTimestampLosesToAnEdit() throws {
+        // A plan saved before modifiedAt existed decodes as .distantPast, so any real
+        // edit beats it rather than the other way round.
+        let id = UUID()
+        let json = """
+        {
+          "id": "\(id.uuidString)",
+          "name": "Legacy",
+          "driveMode": "time",
+          "segments": [],
+          "zones": { "method": { "direct": { "edges": [100,120,140,160,175,190] } } }
+        }
+        """.data(using: .utf8)!
+        let legacy = try JSONDecoder().decode(WorkoutPlan.self, from: json)
+        XCTAssertEqual(legacy.modifiedAt, .distantPast)
+
+        let edited = plan("Edited", id: id, modified: Date())
+        XCTAssertEqual(PlanMerge.merge(incoming: [legacy], local: [edited]).map(\.name), ["Edited"])
+    }
+}
+
 final class ZoneTests: XCTestCase {
 
     func testDirectEdgesAreUsedVerbatim() {

@@ -33,7 +33,10 @@ final class PlanLibrary: NSObject {
 
     func update(_ plan: WorkoutPlan) {
         guard let index = plans.firstIndex(where: { $0.id == plan.id }) else { return }
-        plans[index] = plan
+        var stamped = plan
+        // Stamped so the watch can tell whose edit is newer when this pushes across.
+        stamped.touch()
+        plans[index] = stamped
         persistAndPush()
     }
 

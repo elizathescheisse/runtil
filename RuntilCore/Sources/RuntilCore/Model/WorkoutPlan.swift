@@ -60,6 +60,13 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
     /// double-counting the same miles and calories.
     public var savesToHealth: Bool
 
+    /// When this plan was last edited, on either device.
+    ///
+    /// The phone pushes its whole library to the watch, so without this a tweak made on
+    /// the wrist would be silently overwritten by the next sync. Whoever edited most
+    /// recently wins — see `PlanMerge`.
+    public var modifiedAt: Date
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -70,9 +77,11 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
         hrResponse: HRResponseProfile = .default,
         advisories: Advisories = .none,
         units: DistanceUnit = .miles,
-        savesToHealth: Bool = true
+        savesToHealth: Bool = true,
+        modifiedAt: Date = Date()
     ) {
         self.savesToHealth = savesToHealth
+        self.modifiedAt = modifiedAt
         self.id = id
         self.name = name
         self.driveMode = driveMode
@@ -98,6 +107,14 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
         advisories = try container.decodeIfPresent(Advisories.self, forKey: .advisories) ?? .none
         units = try container.decodeIfPresent(DistanceUnit.self, forKey: .units) ?? .miles
         savesToHealth = try container.decodeIfPresent(Bool.self, forKey: .savesToHealth) ?? true
+        // Legacy plans lose to any explicit edit, which is the safe direction: a plan
+        // nobody has touched since this field existed shouldn't beat a deliberate change.
+        modifiedAt = try container.decodeIfPresent(Date.self, forKey: .modifiedAt) ?? .distantPast
+    }
+
+    /// Stamp an edit. Call this on any change you want to survive the next sync.
+    public mutating func touch(at date: Date = Date()) {
+        modifiedAt = date
     }
 
     /// Total planned duration when that's knowable — nil for HR- or distance-driven plans,

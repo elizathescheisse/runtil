@@ -29,9 +29,11 @@ final class PlanStore: NSObject {
         PlanFile.save(plans)
     }
 
+    /// Takes the phone's library, but keeps any plan edited more recently on the wrist —
+    /// otherwise an adjustment made at the trailhead vanishes on the next sync.
     func replaceAll(with newPlans: [WorkoutPlan]) {
         guard !newPlans.isEmpty else { return }
-        plans = newPlans
+        plans = PlanMerge.merge(incoming: newPlans, local: plans)
         lastSyncedAt = Date()
         save()
     }
@@ -39,10 +41,12 @@ final class PlanStore: NSObject {
     /// Persists a tweak made on the wrist — notably a lag value accepted from the post-run
     /// summary, which shouldn't require getting the phone out.
     func update(_ plan: WorkoutPlan) {
-        if let index = plans.firstIndex(where: { $0.id == plan.id }) {
-            plans[index] = plan
+        var stamped = plan
+        stamped.touch()
+        if let index = plans.firstIndex(where: { $0.id == stamped.id }) {
+            plans[index] = stamped
         } else {
-            plans.append(plan)
+            plans.append(stamped)
         }
         save()
     }
