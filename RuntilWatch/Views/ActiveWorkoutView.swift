@@ -62,59 +62,57 @@ struct ActiveWorkoutView: View {
 private struct MetricsPage: View {
     let controller: WorkoutController
 
+    private var units: DistanceUnit { controller.plan?.units ?? .miles }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SegmentBanner(controller: controller)
+        // Scrolls so a small watch, a long plan name or a large text size can never clip
+        // the numbers off the edge — this is the screen you glance at mid-stride.
+        ScrollView {
+            VStack(alignment: .leading, spacing: 6) {
+                SegmentBanner(controller: controller)
 
-            HStack(alignment: .firstTextBaseline) {
-                Text(controller.heartRate.map(String.init) ?? "--")
-                    .font(.system(size: 34, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.pink)
-                Text("bpm")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(controller.heartRate.map(String.init) ?? "--")
+                        .font(.system(size: 32, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.pink)
+                    Text("bpm")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
 
-                Spacer()
+                    Spacer()
 
-                // The projection is what the engine actually decides on, so it's worth
-                // showing next to the raw number rather than hiding.
-                if let projected = controller.projectedHeartRate,
-                   let actual = controller.heartRate,
-                   abs(projected - actual) >= 2 {
-                    VStack(alignment: .trailing, spacing: 0) {
+                    // The projection is what the engine actually decides on, so it earns
+                    // its place beside the raw number.
+                    if let projected = controller.projectedHeartRate,
+                       let actual = controller.heartRate,
+                       abs(projected - actual) >= 2 {
                         Text("→ \(projected)")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(.pink.opacity(0.8))
-                        Text("projected")
-                            .font(.system(size: 9))
-                            .foregroundStyle(.secondary)
                     }
                 }
-            }
 
-            Divider()
+                Divider()
 
-            LabeledContent("Distance") {
-                Text(Format.distance(meters: controller.distance, unit: controller.plan?.units ?? .miles))
-            }
-            LabeledContent("Pace") {
-                Text(Format.pace(secondsPerMeter: controller.rollingPace, unit: controller.plan?.units ?? .miles))
-            }
-            LabeledContent("Elapsed") {
-                Text(Format.duration(controller.elapsed))
+                LabeledContent("Distance") {
+                    Text(Format.distance(meters: controller.distance, unit: units))
+                }
+                LabeledContent("Pace") {
+                    Text(Format.pace(secondsPerMeter: controller.rollingPace, unit: units))
+                }
+                LabeledContent("Elapsed") {
+                    Text(Format.duration(controller.elapsed))
+                }
+
+                if controller.isMirroringToPhone {
+                    Label("Phone", systemImage: "iphone.radiowaves.left.and.right")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.green)
+                }
             }
             .font(.caption)
-
-            if controller.isMirroringToPhone {
-                Label("Phone connected", systemImage: "iphone.radiowaves.left.and.right")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.green)
-            }
-
-            Spacer()
+            .padding(.horizontal, 2)
         }
-        .font(.caption)
-        .padding(.horizontal, 4)
     }
 }
 
@@ -158,7 +156,7 @@ private struct ControlsPage: View {
         VStack(spacing: 8) {
             HStack(spacing: 10) {
                 Button(role: .destructive, action: onEnd) {
-                    Label("End", systemImage: "xmark")
+                    Label("End", systemImage: "stop.circle.fill")
                 }
                 Button {
                     controller.state == .paused ? controller.resume() : controller.pause()

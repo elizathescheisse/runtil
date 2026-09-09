@@ -84,6 +84,7 @@ struct PlanListView: View {
         .fullScreenCover(item: $selectedPlan) { plan in
             ActiveWorkoutView(controller: controller, store: store)
                 .task {
+                    print("[runtil] cover .task fired for \(plan.name) — isActive=\(controller.isActive)")
                     // Re-entering a run in progress should show it, not start it again.
                     guard !controller.isActive else { return }
                     await controller.start(plan: plan, simulated: useSimulation)

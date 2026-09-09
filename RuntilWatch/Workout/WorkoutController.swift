@@ -93,9 +93,13 @@ final class WorkoutController {
     }
 
     func start(plan: WorkoutPlan, simulated: Bool) async {
+        print("[runtil] start(plan:) called — state=\(state) isActive=\(isActive)")
         // Starting a second run over a live one would orphan the first session, which
         // keeps holding the watch's only workout slot with no way to reach it.
-        guard !isActive else { return }
+        guard !isActive else {
+            print("[runtil] start refused — already active")
+            return
+        }
 
         let engine = CueEngine(plan: plan)
         self.engine = engine
@@ -210,6 +214,7 @@ final class WorkoutController {
     }
 
     func finish() async {
+        print("[runtil] finish() called — state=\(state)")
         consumeTask?.cancel()
         consumeTask = nil
 
@@ -220,11 +225,15 @@ final class WorkoutController {
 
         let finishing = source
         source = nil
+        print("[runtil] state set to finished; tearing down")
         await finishing?.stop()
+        print("[runtil] source stopped")
         await finishing?.finish()
+        print("[runtil] workout saved/discarded")
     }
 
     func reset() {
+        print("[runtil] reset() called — state was \(state)")
         engine = nil
         latestTick = nil
         elapsed = 0
