@@ -36,6 +36,7 @@
 		8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946A5C92F48F74168B098DB /* RuntilApp.swift */; };
 		8F6042D22125174D725290BC /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E837BF326D3D3675EF3CB888 /* HistoryView.swift */; };
 		9578770EA4C80B465B612656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4267ADC008F5E77C6C3566F5 /* Assets.xcassets */; };
+		9A020A64A969A956154AF944 /* HealthProfileImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41D1B351F0E8311C391AECE /* HealthProfileImporter.swift */; };
 		A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */; };
 		A43F2E0C3B4CA5174C6DAE3A /* RuntilWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9C145A547ACBE2C965853F5 /* StartRunIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79409A51839CC85FB8073C5 /* StartRunIntent.swift */; };
@@ -137,11 +138,12 @@
 		D946A5C92F48F74168B098DB /* RuntilApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilApp.swift; sourceTree = "<group>"; };
 		DAF12F2D03F21DF75E433DEA /* HeartRateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitor.swift; sourceTree = "<group>"; };
 		DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilWidgetBundle.swift; sourceTree = "<group>"; };
+		E41D1B351F0E8311C391AECE /* HealthProfileImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthProfileImporter.swift; sourceTree = "<group>"; };
 		E837BF326D3D3675EF3CB888 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		F0A4C32787AB066C2B16A9FE /* HeartRateMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitorView.swift; sourceTree = "<group>"; };
 		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
 		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
-		"TEMP_86DCBF85-C6D7-4025-8BF6-FB8251A5F991" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		"TEMP_32F5CF55-F140-413D-83B6-CA2839AD6FAD" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -320,6 +322,7 @@
 		FA5BCB2D268AFE16C9968DDD /* Workout */ = {
 			isa = PBXGroup;
 			children = (
+				E41D1B351F0E8311C391AECE /* HealthProfileImporter.swift */,
 				DAF12F2D03F21DF75E433DEA /* HeartRateMonitor.swift */,
 				4C282B347B257314CC04B905 /* MirroredWorkoutObserver.swift */,
 				B7BDF3BEF5348BA33D0F6BD6 /* PhoneMetricSource.swift */,
@@ -329,10 +332,10 @@
 			path = Workout;
 			sourceTree = "<group>";
 		};
-		"TEMP_3E402495-4872-42E1-8BA6-A8409398561B" /* haptics */ = {
+		"TEMP_DB69A070-7B3D-4D82-847E-D9960318853F" /* haptics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_86DCBF85-C6D7-4025-8BF6-FB8251A5F991" /* Local.xcconfig */,
+				"TEMP_32F5CF55-F140-413D-83B6-CA2839AD6FAD" /* Local.xcconfig */,
 			);
 			path = haptics;
 			sourceTree = "<group>";
@@ -473,6 +476,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16DDA85CA31CC334287FB621 /* AudioCuePlayer.swift in Sources */,
+				9A020A64A969A956154AF944 /* HealthProfileImporter.swift in Sources */,
 				776F0B0133C89702B1CD3430 /* HeartRateMonitor.swift in Sources */,
 				A9D88D33A2EA18C603D59E7C /* HeartRateMonitorView.swift in Sources */,
 				8F6042D22125174D725290BC /* HistoryView.swift in Sources */,
@@ -574,7 +578,7 @@
 		};
 		3427D6FE32EC695648C53188 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_86DCBF85-C6D7-4025-8BF6-FB8251A5F991" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_32F5CF55-F140-413D-83B6-CA2839AD6FAD" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -608,7 +612,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -693,7 +697,7 @@
 		};
 		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_86DCBF85-C6D7-4025-8BF6-FB8251A5F991" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_32F5CF55-F140-413D-83B6-CA2839AD6FAD" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -727,7 +731,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

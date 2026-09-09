@@ -14,6 +14,7 @@ struct ZoneEditorView: View {
     @State private var restingHR: Int = 60
     @State private var age: Int = 35
     @State private var edges: [Int] = [100, 120, 140, 160, 175, 190]
+    @State private var importer = HealthProfileImporter()
 
     enum MethodChoice: String, CaseIterable, Identifiable {
         case direct = "Direct"
@@ -35,6 +36,10 @@ struct ZoneEditorView: View {
 
     var body: some View {
         Form {
+            HealthImportSection(importer: importer) { profile in
+                apply(profile)
+            }
+
             Section {
                 Picker("Method", selection: $method) {
                     ForEach(MethodChoice.allCases) { choice in
@@ -101,6 +106,7 @@ struct ZoneEditorView: View {
         .navigationTitle("Zones")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: loadFromBinding)
+        .task { if !importer.hasLoaded { await importer.load() } }
         .onChange(of: preview) { _, newValue in zones = newValue }
     }
 
@@ -134,6 +140,76 @@ struct ZoneEditorView: View {
 
     private func label(forEdge index: Int) -> String {
         index == 5 ? "Top of Z5" : "Bottom of Z\(index + 1)"
+    }
+
+    /// Fills in whatever Health knew, choosing the most accurate model the data supports.
+    private func apply(_ profile: HealthProfileImporter.Profile) {
+        if let found = profile.age { age = found }
+        if let found = profile.restingHeartRate { restingHR = found }
+        if let found = profile.bestMaxHeartRate { maxHR = found }
+
+        // Karvonen only beats %max when the resting rate is real. With a guessed one it is
+        // just %max wearing a disguise, so the method follows the data rather than being
+        // asserted.
+        method = profile.restingHeartRate != nil ? .karvonen : .percentMax
+    }
+}
+
+/// Offers what Health already knows, rather than making you type numbers your watch
+/// has been recording for months.
+private struct HealthImportSection: View {
+    let importer: HealthProfileImporter
+    let onApply: (HealthProfileImporter.Profile) -> Void
+
+    @State private var applied = false
+
+    var body: some View {
+        Section {
+            if importer.isLoading {
+                HStack { ProgressView(); Text("Reading Health…").foregroundStyle(.secondary) }
+            } else if importer.profile.hasAnything {
+                if let age = importer.profile.age {
+                    LabeledContent("Age") { Text("\(age)") }
+                }
+                if let resting = importer.profile.restingHeartRate {
+                    LabeledContent("Resting heart rate") { Text("\(resting) bpm") }
+                }
+                if let observed = importer.profile.observedMaxHeartRate {
+                    LabeledContent("Highest recorded") {
+                        Text("\(observed) bpm")
+                    }
+                } else if let age = importer.profile.age {
+                    LabeledContent("Max heart rate") {
+                        Text("\(HeartRateZones.tanakaMaxHR(age: age)) bpm · estimated")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if applied {
+                    Label("Applied", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else {
+                    Button("Use these values") {
+                        onApply(importer.profile)
+                        applied = true
+                    }
+                }
+            } else if importer.hasLoaded {
+                Text("Nothing found in Health.")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("From Health")
+        } footer: {
+            if importer.profile.observedMaxHeartRate != nil {
+                // Being straight about what this number is: a floor, not a ceiling.
+                Text("Your maximum is taken from the highest rate recorded in the last year, which beats an age formula — those vary by ±10 bpm between people. It can only be as high as something you've actually hit, so if you've never gone truly all out, raise it.")
+            } else if importer.hasLoaded && !importer.profile.hasAnything {
+                Text("Either Health has no data for these, or access wasn't granted — iOS doesn't let an app tell the difference. Enter your numbers below instead, or check Settings › Health › Data Access.")
+            } else {
+                Text("Read from Health so you don't have to type numbers your watch has been recording anyway.")
+            }
+        }
     }
 }
 
