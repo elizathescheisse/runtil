@@ -26,6 +26,53 @@ packages:
   RuntilCore:
     path: RuntilCore
 
+# Declared explicitly so they're shared files in the project rather than per-user schemes
+# Xcode autocreates in gitignored xcuserdata — those drift, and a missing scheme means a
+# target you simply can't select and run.
+schemes:
+  Runtil:
+    build:
+      targets:
+        Runtil: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  RuntilWatch:
+    build:
+      targets:
+        RuntilWatch: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  RuntilWatchWidgets:
+    build:
+      targets:
+        RuntilWatchWidgets: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
 targets:
 
   Runtil:
