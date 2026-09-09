@@ -157,18 +157,25 @@ public enum RunAnalysis {
 
     /// Linear interpolation between the two samples bracketing a distance, so a split
     /// boundary landing between GPS fixes doesn't get rounded to whichever is nearer.
-    private static func elapsed(
+    ///
+    /// `previous` has to advance on every sample, not only on the ones past the target.
+    /// Filtering the loop leaves it pinned to the first sample, which interpolates from
+    /// the start of the whole run instead of from the boundary's neighbour — right by
+    /// coincidence at constant pace, and increasingly wrong the more the pace varied.
+    static func elapsed(
         atDistance target: Double,
         in samples: [(elapsed: TimeInterval, distance: Double)]
     ) -> TimeInterval {
-        guard let first = samples.first else { return 0 }
-        var previous = first
+        guard var previous = samples.first else { return 0 }
 
-        for sample in samples where sample.distance >= target {
-            let span = sample.distance - previous.distance
-            guard span > 0 else { return sample.elapsed }
-            let fraction = (target - previous.distance) / span
-            return previous.elapsed + (sample.elapsed - previous.elapsed) * fraction
+        for sample in samples {
+            if sample.distance >= target {
+                let span = sample.distance - previous.distance
+                guard span > 0 else { return sample.elapsed }
+                let fraction = (target - previous.distance) / span
+                return previous.elapsed + (sample.elapsed - previous.elapsed) * fraction
+            }
+            previous = sample
         }
         return samples.last?.elapsed ?? 0
     }

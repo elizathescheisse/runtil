@@ -148,6 +148,37 @@ final class SplitTests: XCTestCase {
         XCTAssertLessThan(splits[1].duration, splits[0].duration)
     }
 
+    func testBoundaryInterpolatesFromItsNeighbourNotTheRunStart() {
+        // Deliberately non-linear: 1 m/s, then 10 m/s. 350m falls between (210,300) and
+        // (220,400), so the answer is 215.
+        //
+        // Interpolating from the first sample instead would give 220 × (350/400) = 192.5.
+        // At constant pace the two agree exactly, which is why every steady-pace test
+        // passed while this was broken.
+        let samples: [(elapsed: TimeInterval, distance: Double)] = [
+            (0, 0), (100, 100), (200, 200), (210, 300), (220, 400)
+        ]
+        XCTAssertEqual(RunAnalysis.elapsed(atDistance: 350, in: samples), 215, accuracy: 0.5)
+    }
+
+    func testSplitsAfterAPaceChangeAreTimedCorrectly() {
+        // A run that walks then sprints, sampled sparsely enough that boundaries land
+        // between fixes — the shape that exposes a bad interpolation.
+        var samples: [(elapsed: TimeInterval, distance: Double)] = []
+        var distance = 0.0
+        for second in stride(from: 0, through: 900, by: 15) {
+            let speed: Double = second < 600 ? 1.0 : 5.0
+            if second > 0 { distance += speed * 15 }
+            samples.append((TimeInterval(second), distance))
+        }
+
+        let splits = RunAnalysis.splits(samples: samples, every: 450)
+        // First 450m at 1 m/s takes 450s.
+        XCTAssertEqual(splits[0].duration, 450, accuracy: 20)
+        // 450→900m: 150m at 1 m/s (150s) then 300m at 5 m/s (60s) ≈ 210s.
+        XCTAssertEqual(splits[1].duration, 210, accuracy: 20)
+    }
+
     func testDegenerateInput() {
         XCTAssertTrue(RunAnalysis.splits(samples: [], every: 1000).isEmpty)
         XCTAssertTrue(RunAnalysis.splits(samples: steadyRun(seconds: 10), every: 0).isEmpty)
