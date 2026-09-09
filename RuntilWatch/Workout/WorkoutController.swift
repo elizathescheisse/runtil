@@ -85,6 +85,13 @@ final class WorkoutController {
         state == .running || state == .paused
     }
 
+    /// Whether the phone is receiving a live copy. Surfaced because mirroring failing
+    /// silently is indistinguishable from the phone app simply not being open, and the
+    /// two want completely different fixes.
+    var isMirroringToPhone: Bool {
+        (source as? LiveMetricSource)?.isMirroring ?? false
+    }
+
     func start(plan: WorkoutPlan, simulated: Bool) async {
         // Starting a second run over a live one would orphan the first session, which
         // keeps holding the watch's only workout slot with no way to reach it.

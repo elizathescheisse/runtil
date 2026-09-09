@@ -105,6 +105,12 @@ private struct MetricsPage: View {
             }
             .font(.caption)
 
+            if controller.isMirroringToPhone {
+                Label("Phone connected", systemImage: "iphone.radiowaves.left.and.right")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.green)
+            }
+
             Spacer()
         }
         .font(.caption)

@@ -44,6 +44,14 @@ final class MirroredWorkoutObserver: NSObject {
             default: return "Unavailable"
             }
         }
+
+        var guidance: String? {
+            switch self {
+            case .ready:
+                return "Start a run on your watch and it appears here, with spoken cues through your headphones."
+            default: return nil
+            }
+        }
     }
 
     private(set) var state: MirroredState?
@@ -197,7 +205,10 @@ enum WatchPairing {
         // strap to "start on watch" for a watch they don't own.
         guard session.activationState == .activated else { return .checking }
         guard session.isPaired else { return .noPairedWatch }
-        guard session.isWatchAppInstalled else { return .watchAppNotInstalled }
+        // isWatchAppInstalled is deliberately not consulted. It reports false for an app
+        // installed outside the normal companion flow — a development build, say — and
+        // reporting "unavailable" for a watch app that is demonstrably running is worse
+        // than occasionally saying ready when it isn't. A mirrored session proves it.
         return .ready
     }
 }

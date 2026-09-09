@@ -117,6 +117,10 @@ private struct PlanPickerView: View {
                     Text(explanation)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } else if let guidance = mirror.availability.guidance {
+                    Text(guidance)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 NavigationLink {
