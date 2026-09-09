@@ -50,24 +50,81 @@ public struct Advisories: Codable, Hashable, Sendable {
 /// be missed entirely or mistaken for a text message. Repeating until the pace confirms
 /// the change makes the cue unambiguous: if it's still nagging, it meant you.
 public struct EffortConfirmation: Codable, Hashable, Sendable {
-    /// Seconds after a segment starts before the first repeat. Long enough to actually
-    /// change gear, and to let a rolling GPS pace catch up with you.
-    public var repeatAfter: TimeInterval
+    /// Seconds before the first repeat.
+    ///
+    /// Floored by physics rather than taste: pace can't confirm a change of effort until
+    /// `confirmSamples` readings have arrived inside the new segment, so anything under
+    /// that buzzes at people who already did what they were told. Four seconds is one
+    /// beat past the earliest moment compliance can be seen.
+    public var firstRepeatAfter: TimeInterval
+    /// Seconds between repeats after the first.
+    ///
+    /// Shorter than the first gap, because by now you've demonstrably not changed and the
+    /// segment is running out. A haptic phrase is about a second long and the player keeps
+    /// a 1.2s silence between phrases, so this is close to as insistent as the wrist can
+    /// physically be without the buzzes blurring into one.
+    public var repeatInterval: TimeInterval
     /// How many times to repeat before giving up. Bounded because a wrong threshold, a
     /// treadmill, or a lost GPS fix must not turn into buzzing for the whole segment.
     public var maxRepeats: Int
+    /// Consecutive in-segment pace readings that must agree before a change counts as made.
+    ///
+    /// Three is enough to reject a single noisy GPS sample without being slow — and the
+    /// threshold sits in the dead zone between a brisk walk and a slow jog, where readings
+    /// don't hover anyway.
+    public var confirmSamples: Int
     /// Seconds per metre dividing running from walking. Default ≈ 14:30/mile, which sits
     /// between a brisk walk and a slow jog.
     public var runWalkThresholdSecondsPerMeter: Double
 
     public init(
-        repeatAfter: TimeInterval = 10,
-        maxRepeats: Int = 3,
+        firstRepeatAfter: TimeInterval = 4,
+        repeatInterval: TimeInterval = 3,
+        maxRepeats: Int = 5,
+        confirmSamples: Int = 3,
         runWalkThresholdSecondsPerMeter: Double = 0.54
     ) {
-        self.repeatAfter = repeatAfter
+        self.firstRepeatAfter = firstRepeatAfter
+        self.repeatInterval = repeatInterval
         self.maxRepeats = maxRepeats
+        self.confirmSamples = confirmSamples
         self.runWalkThresholdSecondsPerMeter = runWalkThresholdSecondsPerMeter
+    }
+
+    /// Ignores the single `repeatAfter` these settings used to be, rather than migrating
+    /// it. It was one value doing two jobs at ten seconds, and no one chose it — carrying
+    /// it forward would leave saved plans nagging on the old, far too patient schedule.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let defaults = EffortConfirmation()
+
+        // The three schedule fields are one decision, so they move together. A saved plan
+        // written before the split has none of them — only a single `repeatAfter: 10`,
+        // which nobody chose and which doesn't map onto the new shape. Migrating a count
+        // that was picked to pair with ten-second spacing would leave three nags crammed
+        // into the first ten seconds, so the whole schedule reverts to the current default.
+        let hasNewSchedule = container.contains(.firstRepeatAfter)
+        firstRepeatAfter = hasNewSchedule
+            ? try container.decodeIfPresent(TimeInterval.self, forKey: .firstRepeatAfter) ?? defaults.firstRepeatAfter
+            : defaults.firstRepeatAfter
+        repeatInterval = hasNewSchedule
+            ? try container.decodeIfPresent(TimeInterval.self, forKey: .repeatInterval) ?? defaults.repeatInterval
+            : defaults.repeatInterval
+        maxRepeats = hasNewSchedule
+            ? try container.decodeIfPresent(Int.self, forKey: .maxRepeats) ?? defaults.maxRepeats
+            : defaults.maxRepeats
+
+        confirmSamples = try container.decodeIfPresent(Int.self, forKey: .confirmSamples)
+            ?? defaults.confirmSamples
+        // A real setting, and the one the post-run pace calibration can change. Kept.
+        runWalkThresholdSecondsPerMeter = try container.decodeIfPresent(
+            Double.self, forKey: .runWalkThresholdSecondsPerMeter
+        ) ?? defaults.runWalkThresholdSecondsPerMeter
+    }
+
+    /// The whole window in which a change is still being asked for.
+    public var nagWindow: TimeInterval {
+        firstRepeatAfter + repeatInterval * Double(maxRepeats)
     }
 
     /// Whether the pace being held matches what the segment asked for.

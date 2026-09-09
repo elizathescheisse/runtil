@@ -47,12 +47,7 @@ public final class CueEngine {
     /// given up anyway.
     public var isPromptingEffortChange: Bool {
         guard !effortConfirmed, currentSegment != nil else { return false }
-        let window: TimeInterval
-        if let confirmation = plan.advisories.effortConfirmation {
-            window = confirmation.repeatAfter * Double(confirmation.maxRepeats + 1)
-        } else {
-            window = 12
-        }
+        let window = (plan.advisories.effortConfirmation ?? EffortConfirmation()).nagWindow
         return (lastElapsed - segmentStartElapsed) < window
     }
 
@@ -93,17 +88,31 @@ public final class CueEngine {
 
     private var response: HRResponseProfile { plan.hrResponse }
 
-    /// Average pace since the current segment began.
+    /// Whether the last few pace readings agree that you're doing what was asked.
     ///
-    /// The ordinary rolling pace spans a fixed window that straddles the transition, so ten
-    /// seconds into a walk it is still mostly made of running — judging compliance on that
-    /// would nag you for not walking while you are, in fact, walking.
+    /// Only readings from inside the current segment count. The ordinary rolling pace spans
+    /// a fixed window that straddles the transition, so ten seconds into a walk it is still
+    /// mostly made of running — judging compliance on that nags you for not walking while
+    /// you are, in fact, walking.
     ///
-    /// Returns nil until there are enough samples to mean anything.
-    private var paceSinceSegmentStart: Double? {
-        let samples = paceHistory.filter { $0.elapsed >= segmentStartElapsed }
-        guard samples.count >= 5 else { return nil }
-        return samples.map(\.pace).reduce(0, +) / Double(samples.count)
+    /// Consecutive readings rather than an average over the segment, because an average
+    /// carries your non-compliance forward: ignore a walk cue for twenty seconds and then
+    /// start walking, and a mean since the segment began stays above the threshold long
+    /// after you've done the right thing. What matters is what you're doing *now*.
+    ///
+    /// Returns nil until enough readings have arrived — indoors, or before a GPS fix
+    /// settles, that never happens, and unknown has to mean "don't nag".
+    private func recentEffortMatches(
+        _ kind: SegmentKind,
+        _ confirmation: EffortConfirmation
+    ) -> Bool? {
+        let recent = paceHistory
+            .filter { $0.elapsed >= segmentStartElapsed }
+            .suffix(confirmation.confirmSamples)
+        guard recent.count >= confirmation.confirmSamples else { return nil }
+        let verdicts = recent.compactMap { confirmation.matchesEffort(kind, pace: $0.pace) }
+        guard verdicts.count == recent.count else { return nil }
+        return verdicts.allSatisfy { $0 }
     }
 
     /// Physiologically plausible ceiling on HR slope. Guards against a sensor glitch
@@ -298,7 +307,7 @@ public final class CueEngine {
     /// scheduled nag.
     private func updateEffortConfirmation(_ segment: Segment) {
         guard !effortConfirmed, let confirmation = plan.advisories.effortConfirmation else { return }
-        if confirmation.matchesEffort(segment.kind, pace: paceSinceSegmentStart) == true {
+        if recentEffortMatches(segment.kind, confirmation) == true {
             effortConfirmed = true
         }
     }
@@ -319,15 +328,13 @@ public final class CueEngine {
         guard let confirmation = plan.advisories.effortConfirmation,
               !effortConfirmed,
               effortRepeats < confirmation.maxRepeats,
-              inSegment >= confirmation.repeatAfter,
-              tick.elapsed - lastEffortRepeatAt >= confirmation.repeatAfter
+              inSegment >= confirmation.firstRepeatAfter,
+              tick.elapsed - lastEffortRepeatAt >= confirmation.repeatInterval
         else { return [] }
 
         // Unknown means indoors or a GPS fix that hasn't settled. Repeating a cue nobody
         // can satisfy is worse than missing one, so silence is the right answer.
-        guard let matches = confirmation.matchesEffort(segment.kind, pace: paceSinceSegmentStart) else {
-            return []
-        }
+        guard let matches = recentEffortMatches(segment.kind, confirmation) else { return [] }
         if matches {
             effortConfirmed = true
             return []

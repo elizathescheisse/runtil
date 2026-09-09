@@ -216,10 +216,15 @@ final class HeartRateDrivenTests: XCTestCase {
 final class EffortConfirmationTests: XCTestCase {
 
     /// A plan that repeats its segment cue until pace confirms the change.
-    private func plan(repeatAfter: TimeInterval = 10, maxRepeats: Int = 3) -> WorkoutPlan {
+    private func plan(
+        firstRepeatAfter: TimeInterval = 4,
+        repeatInterval: TimeInterval = 3,
+        maxRepeats: Int = 5
+    ) -> WorkoutPlan {
         var plan = WorkoutPlan.timedIntervals(run: 120, walk: 120, repeatCount: 2, zones: testZones)
         plan.advisories.effortConfirmation = EffortConfirmation(
-            repeatAfter: repeatAfter,
+            firstRepeatAfter: firstRepeatAfter,
+            repeatInterval: repeatInterval,
             maxRepeats: maxRepeats
         )
         return plan
@@ -269,7 +274,7 @@ final class EffortConfirmationTests: XCTestCase {
 
     func testRepeatsAreBounded() {
         // Never complies at all. The nagging has to stop regardless.
-        let engine = CueEngine(plan: plan(repeatAfter: 5, maxRepeats: 2))
+        let engine = CueEngine(plan: plan(firstRepeatAfter: 5, repeatInterval: 5, maxRepeats: 2))
         let recorder = simulate(
             engine: engine,
             seconds: 240,
@@ -297,7 +302,7 @@ final class EffortConfirmationTests: XCTestCase {
         // The bug this guards: a 25s rolling window straddles the transition, so ten
         // seconds into a walk it is still mostly running — and would nag someone who is
         // walking perfectly well.
-        let engine = CueEngine(plan: plan(repeatAfter: 10))
+        let engine = CueEngine(plan: plan())
         let recorder = simulate(engine: engine, seconds: 200) { _, _ in 130 }
         XCTAssertEqual(repeatCount(recorder), 0)
     }
@@ -355,7 +360,7 @@ final class EffortConfirmationTests: XCTestCase {
         // Keeps running straight through the walk cue. The word must not sit there for
         // the rest of the segment — an instruction nobody is going to follow, or a
         // threshold that's simply wrong for this person, has to time out like the nagging.
-        let engine = CueEngine(plan: plan(repeatAfter: 5, maxRepeats: 2))
+        let engine = CueEngine(plan: plan(firstRepeatAfter: 5, repeatInterval: 5, maxRepeats: 2))
         let timeline = promptTimeline(engine: engine, seconds: 200) { _, _ in 3.0 }
 
         XCTAssertTrue(timeline[120], "the walk cue should still show")
@@ -364,7 +369,7 @@ final class EffortConfirmationTests: XCTestCase {
 
     func testPromptClearsWithoutPaceData() {
         // Indoors: nothing can ever confirm. Bounded by the same window.
-        let engine = CueEngine(plan: plan(repeatAfter: 5, maxRepeats: 2))
+        let engine = CueEngine(plan: plan(firstRepeatAfter: 5, repeatInterval: 5, maxRepeats: 2))
         var timeline: [Bool] = []
         for second in 0...60 {
             _ = engine.advance(Tick(elapsed: TimeInterval(second), totalDistance: 0,
@@ -373,6 +378,61 @@ final class EffortConfirmationTests: XCTestCase {
         }
         XCTAssertTrue(timeline[0])
         XCTAssertFalse(timeline[30], "no pace must not mean a permanent instruction")
+    }
+
+    func testRepeatsComeQuicklyEnoughToMatterInsideAShortSegment() {
+        // The complaint this fixes: one ten-second value did both jobs, so a thirty-second
+        // walk got nagged twice and a shorter one barely once. First nag one beat after
+        // pace could possibly confirm, then every three seconds.
+        let engine = CueEngine(plan: plan())
+        let recorder = simulate(engine: engine, seconds: 200, metersPerSecond: { _, _ in 3.0 }) { _, _ in 130 }
+
+        // The walk segment opens at 120s; its cue repeats while the running continues.
+        let walkCues = startCues(recorder, kind: .walk).filter { $0 >= 120 && $0 < 240 }
+        XCTAssertEqual(walkCues, [120, 124, 127, 130, 133, 136],
+                       "opening cue, then a first nag at 4s and every 3s after")
+    }
+
+    func testComplyingLateIsNoticedStraightAway() {
+        // Guards a flaw in judging compliance on the average pace since the segment began:
+        // twenty seconds of ignoring the cue stays in that average, so it keeps nagging for
+        // roughly another twenty-four seconds after you finally start walking. What matters
+        // is what you're doing now, not what you did when the buzz went off.
+        let engine = CueEngine(plan: plan(maxRepeats: 20))
+        let recorder = simulate(
+            engine: engine,
+            seconds: 200,
+            metersPerSecond: { second, _ in second < 140 ? 3.0 : 1.4 }
+        ) { _, _ in 130 }
+
+        // Walk segment starts at 120s; compliance starts at 140s.
+        let nags = startCues(recorder, kind: .walk).filter { $0 > 120 && $0 < 240 }
+        XCTAssertFalse(nags.isEmpty, "should nag while the running continues")
+        XCTAssertLessThanOrEqual(
+            nags.max() ?? 0, 145,
+            "three walking readings is all it should take to stop"
+        )
+    }
+
+    func testLegacySettingsDecodeToTheNewSchedule() throws {
+        // Saved plans carry the single `repeatAfter: 10` these settings used to be. Nobody
+        // chose that number, so it's dropped rather than migrated — otherwise every plan
+        // already on the watch keeps nagging on the old, far too patient schedule.
+        let legacy = Data(#"{"repeatAfter":10,"maxRepeats":3,"runWalkThresholdSecondsPerMeter":0.54}"#.utf8)
+        let decoded = try JSONDecoder().decode(EffortConfirmation.self, from: legacy)
+
+        XCTAssertEqual(decoded.firstRepeatAfter, EffortConfirmation().firstRepeatAfter)
+        XCTAssertEqual(decoded.repeatInterval, EffortConfirmation().repeatInterval)
+        XCTAssertEqual(decoded.maxRepeats, EffortConfirmation().maxRepeats,
+                       "a count chosen for ten-second spacing must not survive into three")
+        XCTAssertEqual(decoded.runWalkThresholdSecondsPerMeter, 0.54, "a real setting still survives")
+
+        // A plan saved by this version keeps whatever it says, legacy key or not.
+        let current = Data(#"{"firstRepeatAfter":8,"repeatInterval":6,"maxRepeats":2}"#.utf8)
+        let kept = try JSONDecoder().decode(EffortConfirmation.self, from: current)
+        XCTAssertEqual(kept.firstRepeatAfter, 8)
+        XCTAssertEqual(kept.repeatInterval, 6)
+        XCTAssertEqual(kept.maxRepeats, 2)
     }
 
     func testThresholdClassifiesPaces() {
