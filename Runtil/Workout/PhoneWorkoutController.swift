@@ -22,7 +22,7 @@ final class PhoneWorkoutController {
     private(set) var elapsed: TimeInterval = 0
 
     let cues = PhoneCuePlayer()
-    let strap = HeartRateStrap()
+    let monitor = HeartRateMonitor()
 
     private var source: PhoneMetricSource?
     private var consumeTask: Task<Void, Never>?
@@ -43,9 +43,9 @@ final class PhoneWorkoutController {
         return max(0, total - timeInSegment)
     }
 
-    /// Heart-rate plans need a strap on the phone — there's no sensor otherwise.
+    /// Heart-rate plans need a paired monitor on the phone — there's no sensor otherwise.
     func canRun(_ plan: WorkoutPlan) -> Bool {
-        plan.driveMode != .heartRate || strap.state.isConnected
+        plan.driveMode != .heartRate || monitor.state.isConnected
     }
 
     func start(plan: WorkoutPlan) async {
@@ -66,7 +66,7 @@ final class PhoneWorkoutController {
         UIApplication.shared.isIdleTimerDisabled = true
 
         let source = PhoneMetricSource(
-            strap: strap.state.isConnected ? strap : nil,
+            monitor: monitor.state.isConnected ? monitor : nil,
             savesToHealth: plan.savesToHealth
         )
         source.onFailure = { [weak self] message in

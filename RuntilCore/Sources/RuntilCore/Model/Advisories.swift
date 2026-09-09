@@ -76,6 +76,33 @@ public struct PaceTarget: Codable, Hashable, Sendable {
         let slow = slowest / unit.metersPerUnit
         return min(fast, slow)...max(fast, slow)
     }
+
+    /// Sensible opening values for a plan: an easy running band and a brisk walking one,
+    /// set only for the segment kinds the plan actually uses.
+    public static func defaultTarget(for plan: WorkoutPlan) -> PaceTarget {
+        var target = PaceTarget()
+        for segment in plan.segments where target.bandsByKind[segment.kind] == nil {
+            target.bandsByKind[segment.kind] = segment.kind.isEffort
+                ? band(fastest: 8 * 60, slowest: 10 * 60, per: plan.units)
+                : band(fastest: 15 * 60, slowest: 20 * 60, per: plan.units)
+        }
+        return target
+    }
+}
+
+extension WorkoutPlan {
+    /// One-line description of the pace target, for a settings row.
+    public var paceTargetSummary: String {
+        guard let target = advisories.paceTarget, !target.bandsByKind.isEmpty else { return "Off" }
+        // Lead with the effort segment, which is the one you're actually pacing.
+        let kind = segments.first(where: { $0.kind.isEffort })?.kind
+            ?? segments.first?.kind
+            ?? .run
+        guard let band = target.bandsByKind[kind] else { return "Set" }
+        let fastest = band.lowerBound * units.metersPerUnit
+        let slowest = band.upperBound * units.metersPerUnit
+        return "\(Format.duration(fastest))–\(Format.duration(slowest)) /\(units.abbreviation)"
+    }
 }
 
 /// Periodic distance chimes — every half mile, every mile, and so on.

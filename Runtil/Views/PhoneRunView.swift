@@ -39,6 +39,13 @@ private struct PlanPickerView: View {
                         Task { await controller.start(plan: plan) }
                     } label: {
                         HStack(spacing: 12) {
+                            // Leading, so it reads as "press play on this one" rather than
+                            // as a status badge trailing the row. Always occupies the slot
+                            // so the names stay aligned whether a plan is runnable or not.
+                            Image(systemName: "play.circle.fill")
+                                .font(.title)
+                                .foregroundStyle(controller.canRun(plan) ? .green : .secondary)
+
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(plan.name)
                                 Text(plan.driveMode.displayName)
@@ -46,14 +53,8 @@ private struct PlanPickerView: View {
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            if controller.canRun(plan) {
-                                // An explicit play control, so this list reads as "start
-                                // one of these" rather than looking like the Plans tab,
-                                // which is for editing.
-                                Image(systemName: "play.circle.fill")
-                                    .font(.title)
-                                    .foregroundStyle(.green)
-                            } else {
+
+                            if !controller.canRun(plan) {
                                 // Names what's missing rather than prescribing one fix —
                                 // the plan needs a heart rate from somewhere.
                                 Label("Needs heart rate", systemImage: "heart.slash")
@@ -70,16 +71,16 @@ private struct PlanPickerView: View {
             } header: {
                 Text("Start a run")
             } footer: {
-                Text("Tap a plan to start tracking. Editing plans happens in the Plans tab.\n\nTime, distance and pace work on their own. Heart-rate plans need a live reading, which on iPhone means a Bluetooth strap — an Apple Watch can't feed heart rate to your phone fast enough to cue you, so run those from the watch app instead.")
+                Text("Tap a plan to start tracking. Editing plans happens in the Plans tab.\n\nTime, distance and pace work on their own. Heart-rate plans need a live reading from a paired Bluetooth monitor — a chest strap, an armband, or anything else that broadcasts heart rate. An Apple Watch can't feed heart rate to your phone fast enough to cue you, so run those plans from the watch app instead.")
             }
 
-            Section("Heart rate strap") {
+            Section("Heart rate") {
                 NavigationLink {
-                    StrapSettingsView(strap: controller.strap)
+                    HeartRateMonitorView(monitor: controller.monitor)
                 } label: {
-                    LabeledContent("Strap") {
-                        Text(controller.strap.state.description)
-                            .foregroundStyle(controller.strap.state.isConnected ? .green : .secondary)
+                    LabeledContent("Monitor") {
+                        Text(controller.monitor.state.description)
+                            .foregroundStyle(controller.monitor.state.isConnected ? .green : .secondary)
                     }
                 }
             }

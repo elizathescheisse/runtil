@@ -3,17 +3,17 @@ import CoreBluetooth
 import Observation
 import RuntilCore
 
-/// Talks to a Bluetooth heart rate strap.
+/// Talks to a Bluetooth heart rate monitor.
 ///
-/// Uses the standard Bluetooth SIG Heart Rate Service (0x180D), which every strap worth
-/// buying implements — Polar, Garmin, Wahoo, Coospo and the rest. So there's no
-/// per-brand code here, and no vendor SDK.
+/// Uses the standard Bluetooth SIG Heart Rate Service (0x180D), which anything worth
+/// buying implements — chest straps, optical armbands, some earbuds and bike computers.
+/// So there's no per-brand code here, and no vendor SDK.
 ///
-/// This is what makes heart-rate plans work without an Apple Watch. A chest strap also
-/// tends to beat a wrist optical sensor for accuracy during running, where wrist motion
-/// and cadence lock cause trouble.
+/// This is what makes heart-rate plans work without an Apple Watch. A chest strap in
+/// particular tends to beat a wrist optical sensor during running, where arm motion and
+/// cadence lock cause trouble.
 @Observable
-final class HeartRateStrap: NSObject {
+final class HeartRateMonitor: NSObject {
 
     enum State: Equatable {
         case unavailable(String)
@@ -37,8 +37,8 @@ final class HeartRateStrap: NSObject {
 
     private(set) var state: State = .idle
     private(set) var heartRate: Int?
-    /// Set when the strap reports it isn't making skin contact — worth surfacing, because
-    /// the usual cause is a dry strap giving nonsense readings.
+    /// Set when the monitor reports it isn't making skin contact — worth surfacing,
+    /// because the usual cause is a dry sensor giving nonsense readings.
     private(set) var poorContact = false
 
     private var central: CBCentralManager?
@@ -47,10 +47,10 @@ final class HeartRateStrap: NSObject {
     private static let heartRateService = CBUUID(string: "180D")
     private static let measurementCharacteristic = CBUUID(string: "2A37")
 
-    /// Remembered so a strap that drops mid-run can be picked up again without asking.
+    /// Remembered so a monitor that drops mid-run can be picked up again without asking.
     private var lastKnownIdentifier: UUID? {
-        get { UserDefaults.standard.string(forKey: "strapID").flatMap(UUID.init(uuidString:)) }
-        set { UserDefaults.standard.set(newValue?.uuidString, forKey: "strapID") }
+        get { UserDefaults.standard.string(forKey: "hrMonitorID").flatMap(UUID.init(uuidString:)) }
+        set { UserDefaults.standard.set(newValue?.uuidString, forKey: "hrMonitorID") }
     }
 
     override init() {
@@ -58,7 +58,7 @@ final class HeartRateStrap: NSObject {
     }
 
     /// Creating the central manager triggers the Bluetooth permission prompt, so it's
-    /// deferred until the user actually asks to connect a strap.
+    /// deferred until the user actually asks to connect a monitor.
     func startScanning() {
         if central == nil {
             central = CBCentralManager(delegate: self, queue: .main)
@@ -78,7 +78,7 @@ final class HeartRateStrap: NSObject {
     private func beginScan() {
         guard let central, central.state == .poweredOn else { return }
 
-        // Reconnect silently to a strap we've used before, if it's already awake.
+        // Reconnect silently to a monitor we've used before, if it's already awake.
         if let id = lastKnownIdentifier,
            let known = central.retrievePeripherals(withIdentifiers: [id]).first {
             connect(to: known)
@@ -92,7 +92,7 @@ final class HeartRateStrap: NSObject {
     private func connect(to peripheral: CBPeripheral) {
         self.peripheral = peripheral
         peripheral.delegate = self
-        state = .connecting(peripheral.name ?? "Strap")
+        state = .connecting(peripheral.name ?? "Monitor")
         central?.stopScan()
         central?.connect(peripheral)
     }
@@ -100,7 +100,7 @@ final class HeartRateStrap: NSObject {
 
 // MARK: - CBCentralManagerDelegate
 
-extension HeartRateStrap: CBCentralManagerDelegate {
+extension HeartRateMonitor: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
@@ -127,7 +127,7 @@ extension HeartRateStrap: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         lastKnownIdentifier = peripheral.identifier
-        state = .connected(peripheral.name ?? "Strap")
+        state = .connected(peripheral.name ?? "Monitor")
         peripheral.discoverServices([Self.heartRateService])
     }
 
@@ -138,7 +138,7 @@ extension HeartRateStrap: CBCentralManagerDelegate {
     ) {
         heartRate = nil
         state = .scanning
-        // Straps drop out when they slip or the battery sags. Keep trying rather than
+        // Monitors drop out when they slip or the battery sags. Keep trying rather than
         // silently stopping — losing heart rate mid-run shouldn't need a phone in hand.
         central.connect(peripheral)
     }
@@ -146,7 +146,7 @@ extension HeartRateStrap: CBCentralManagerDelegate {
 
 // MARK: - CBPeripheralDelegate
 
-extension HeartRateStrap: CBPeripheralDelegate {
+extension HeartRateMonitor: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let service = peripheral.services?.first(where: { $0.uuid == Self.heartRateService })
         else { return }

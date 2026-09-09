@@ -7,7 +7,7 @@ import RuntilCore
 ///
 /// The watch version leans on an `HKWorkoutSession` for distance and heart rate; the phone
 /// has neither, so distance is accumulated from GPS and heart rate comes from a Bluetooth
-/// strap if one is paired. Everything above this — the whole interval state machine — is
+/// monitor if one is paired. Everything above this — the whole interval state machine — is
 /// the same tested code.
 ///
 /// Background location isn't just for the route here: it's what keeps the app alive at all
@@ -15,7 +15,7 @@ import RuntilCore
 final class PhoneMetricSource: NSObject {
 
     private let locationManager = CLLocationManager()
-    private let strap: HeartRateStrap?
+    private let monitor: HeartRateMonitor?
     private let savesToHealth: Bool
 
     private var startDate: Date?
@@ -33,8 +33,8 @@ final class PhoneMetricSource: NSObject {
     let ticks: AsyncStream<Tick>
     var onFailure: ((String) -> Void)?
 
-    init(strap: HeartRateStrap?, savesToHealth: Bool) {
-        self.strap = strap
+    init(monitor: HeartRateMonitor?, savesToHealth: Bool) {
+        self.monitor = monitor
         self.savesToHealth = savesToHealth
         var captured: AsyncStream<Tick>.Continuation!
         self.ticks = AsyncStream { captured = $0 }
@@ -95,7 +95,7 @@ final class PhoneMetricSource: NSObject {
                     Tick(
                         elapsed: Date().timeIntervalSince(startDate),
                         totalDistance: self.totalDistance,
-                        heartRate: self.strap?.heartRate,
+                        heartRate: self.monitor?.heartRate,
                         instantPace: self.latestPace
                     )
                 )

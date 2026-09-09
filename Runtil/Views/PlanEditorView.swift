@@ -260,6 +260,24 @@ private struct AdvisoriesSection: View {
                 set: { plan.advisories.distanceSplits = $0 ? .every(0.5, plan.units) : nil }
             ))
 
+            Toggle("Pace cues", isOn: Binding(
+                get: { plan.advisories.paceTarget != nil },
+                set: { enabled in
+                    plan.advisories.paceTarget = enabled ? PaceTarget.defaultTarget(for: plan) : nil
+                }
+            ))
+
+            if plan.advisories.paceTarget != nil {
+                NavigationLink {
+                    PaceTargetEditorView(plan: $plan)
+                } label: {
+                    LabeledContent("Target pace") {
+                        Text(plan.paceTargetSummary)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
             if let splits = plan.advisories.distanceSplits {
                 Stepper(
                     "Every \(Format.distance(meters: splits.everyMeters, unit: plan.units, decimals: 2))",
