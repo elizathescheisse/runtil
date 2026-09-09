@@ -27,7 +27,7 @@ struct PlanLibraryView: View {
                     SyncFooter(library: library)
                 }
             }
-            .navigationTitle("runtil")
+            .navigationTitle("Plans")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

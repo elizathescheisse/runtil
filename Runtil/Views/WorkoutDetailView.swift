@@ -71,6 +71,15 @@ struct WorkoutDetailView: View {
                 LabeledContent("Conditions") {
                     Text("\(Int(weather.temperatureCelsius))°C · \(Int(weather.relativeHumidity * 100))% humidity")
                 }
+                // Dew point, not humidity, is what predicts a slowdown — so it gets the
+                // plain-language verdict next to it rather than being left as a number.
+                LabeledContent("Dew point") {
+                    Text("\(Int(weather.effectiveDewPointCelsius.rounded()))°C · \(weather.comfort.label)")
+                        .foregroundStyle(Self.comfortColor(weather.comfort))
+                }
+                Text(weather.comfort.effect)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -218,6 +227,15 @@ struct WorkoutDetailView: View {
         case 5...6: return "Moderate — short sentences"
         case 7...8: return "Hard — a few words at a time"
         default: return "Maximal — couldn't speak"
+        }
+    }
+
+    static func comfortColor(_ comfort: RunningComfort) -> Color {
+        switch comfort {
+        case .ideal, .comfortable: return .green
+        case .noticeable: return .yellow
+        case .uncomfortable: return .orange
+        case .difficult, .oppressive: return .red
         }
     }
 

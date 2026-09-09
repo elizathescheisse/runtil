@@ -12,7 +12,6 @@
 		049E4A53680D3BD74F389DE7 /* PlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */; };
 		04A25AC1B738B4C8C1F42780 /* WorkoutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C0C531775CE4E8DA51F196 /* WorkoutController.swift */; };
 		08B6D6733BF888B4AB9A36D5 /* PhoneMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BDF3BEF5348BA33D0F6BD6 /* PhoneMetricSource.swift */; };
-		12FB0DF1740895F40EF5763A /* RuntilWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */; };
 		156BC565F1E68BDDBCC80438 /* PlanEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6617399D8914BA4A3FC2D781 /* PlanEditView.swift */; };
 		16DDA85CA31CC334287FB621 /* AudioCuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DFF3FE46FF2006EBA895E6 /* AudioCuePlayer.swift */; };
 		1970B5B4ACA925551BEE8F8C /* MetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944ACAB8D886C6176D27B6AB /* MetricSource.swift */; };
@@ -29,7 +28,6 @@
 		776F0B0133C89702B1CD3430 /* HeartRateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF12F2D03F21DF75E433DEA /* HeartRateMonitor.swift */; };
 		7F61648D3BF4339F1A9BF0C0 /* PlanEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B2675EE573C64CF256503A /* PlanEditorView.swift */; };
 		83C0DD9DEABC8B0C03807A15 /* RuntilWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		842FC50A2A7F59323456D74B /* RuntilComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593E576FB9AB7B6B5005532B /* RuntilComplication.swift */; };
 		873DFB6ACC164E0DC76AF498 /* RuntilCore in Frameworks */ = {isa = PBXBuildFile; productRef = E630E7339B0CF7B34829D6BE /* RuntilCore */; };
 		89E3FB94E33DA51F0AD004AA /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2556A70DF74AE414458231B /* ActiveWorkoutView.swift */; };
 		8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0038C93211A5142A1C760E /* ZoneEditorView.swift */; };
@@ -37,7 +35,6 @@
 		8F6042D22125174D725290BC /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E837BF326D3D3675EF3CB888 /* HistoryView.swift */; };
 		9578770EA4C80B465B612656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4267ADC008F5E77C6C3566F5 /* Assets.xcassets */; };
 		A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */; };
-		A43F2E0C3B4CA5174C6DAE3A /* RuntilWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9C145A547ACBE2C965853F5 /* StartRunIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79409A51839CC85FB8073C5 /* StartRunIntent.swift */; };
 		A9D88D33A2EA18C603D59E7C /* HeartRateMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A4C32787AB066C2B16A9FE /* HeartRateMonitorView.swift */; };
 		C97A7E878B456000259E4836 /* PlanLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */; };
@@ -59,13 +56,6 @@
 			remoteGlobalIDString = 47D6E2D77BCE12AE13EC1C5B;
 			remoteInfo = RuntilWatch;
 		};
-		787B23593965D5FA9701C872 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 232029787B8729449F5B3831 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8F960ED0FE3BAC501F951865;
-			remoteInfo = RuntilWatchWidgets;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -80,21 +70,9 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B898237F82937747A415F730 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				A43F2E0C3B4CA5174C6DAE3A /* RuntilWatchWidgets.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RuntilWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		04BE87DAE855ED941B1A504F /* WorkoutDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDetailView.swift; sourceTree = "<group>"; };
 		14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStore.swift; sourceTree = "<group>"; };
 		15CD8AC1B818AC8B6321B2A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -111,11 +89,9 @@
 		453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPlayer.swift; sourceTree = "<group>"; };
 		49064794FFA4D51BE2F7E468 /* RuntilWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RuntilWatch.entitlements; sourceTree = "<group>"; };
 		4C282B347B257314CC04B905 /* MirroredWorkoutObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirroredWorkoutObserver.swift; sourceTree = "<group>"; };
-		593E576FB9AB7B6B5005532B /* RuntilComplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilComplication.swift; sourceTree = "<group>"; };
 		64DFF3FE46FF2006EBA895E6 /* AudioCuePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCuePlayer.swift; sourceTree = "<group>"; };
 		6617399D8914BA4A3FC2D781 /* PlanEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEditView.swift; sourceTree = "<group>"; };
 		66AEA9010EA4FB91123187DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6A7B77DB2EF04EDB1DE934F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7C84BD756A47C8C1E76505E2 /* WorkoutDetailLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDetailLoader.swift; sourceTree = "<group>"; };
 		7ECEB196599C3A3BD8A1B8F9 /* Runtil.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runtil.entitlements; sourceTree = "<group>"; };
 		8B65D231A8BD09AA91716D35 /* PaceTargetEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaceTargetEditorView.swift; sourceTree = "<group>"; };
@@ -136,12 +112,11 @@
 		D79409A51839CC85FB8073C5 /* StartRunIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartRunIntent.swift; sourceTree = "<group>"; };
 		D946A5C92F48F74168B098DB /* RuntilApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilApp.swift; sourceTree = "<group>"; };
 		DAF12F2D03F21DF75E433DEA /* HeartRateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitor.swift; sourceTree = "<group>"; };
-		DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntilWidgetBundle.swift; sourceTree = "<group>"; };
 		E837BF326D3D3675EF3CB888 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		F0A4C32787AB066C2B16A9FE /* HeartRateMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitorView.swift; sourceTree = "<group>"; };
 		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
 		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
-		"TEMP_4E166611-8480-4AA1-B485-EEB2F2458DCF" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		"TEMP_B73C458E-5968-45CC-AB34-AD76AD04ED2E" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,16 +155,6 @@
 				14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */,
 			);
 			path = Store;
-			sourceTree = "<group>";
-		};
-		3F030E470535EC70B0FA6C41 /* RuntilWatchWidgets */ = {
-			isa = PBXGroup;
-			children = (
-				6A7B77DB2EF04EDB1DE934F9 /* Info.plist */,
-				593E576FB9AB7B6B5005532B /* RuntilComplication.swift */,
-				DF86EC1F3542995F103D43FA /* RuntilWidgetBundle.swift */,
-			);
-			path = RuntilWatchWidgets;
 			sourceTree = "<group>";
 		};
 		4663FB7524AA4E022B5FA9F4 /* Workout */ = {
@@ -259,7 +224,6 @@
 			children = (
 				C97C6CFB2BF21275ACBEA7CA /* Runtil.app */,
 				2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */,
-				03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -270,7 +234,6 @@
 				CA6978EF273D678262976B63 /* Packages */,
 				9E8D1B35B062779D0912355F /* Runtil */,
 				6DFF7117F81203B5D754140F /* RuntilWatch */,
-				3F030E470535EC70B0FA6C41 /* RuntilWatchWidgets */,
 				7225CE51DFA4F0C064FCBA74 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -329,10 +292,10 @@
 			path = Workout;
 			sourceTree = "<group>";
 		};
-		"TEMP_16968105-7BC5-4AAB-97B5-7A7C95D34D35" /* haptics */ = {
+		"TEMP_2C010F74-8B88-42F4-9E81-790D75237959" /* haptics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_4E166611-8480-4AA1-B485-EEB2F2458DCF" /* Local.xcconfig */,
+				"TEMP_B73C458E-5968-45CC-AB34-AD76AD04ED2E" /* Local.xcconfig */,
 			);
 			path = haptics;
 			sourceTree = "<group>";
@@ -347,12 +310,10 @@
 				EFDA6AEB5BE845EC4B77F9AB /* Sources */,
 				12AF3000C3078760F7D84C86 /* Resources */,
 				9C21B71D4CA4C97F744921F7 /* Frameworks */,
-				B898237F82937747A415F730 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				76879BC69EDCDE45230DBFDA /* PBXTargetDependency */,
 			);
 			name = RuntilWatch;
 			packageProductDependencies = (
@@ -361,23 +322,6 @@
 			productName = RuntilWatch;
 			productReference = 2C8D5E0CF3B21200097E7FE6 /* RuntilWatch.app */;
 			productType = "com.apple.product-type.application";
-		};
-		8F960ED0FE3BAC501F951865 /* RuntilWatchWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = E42B8F89FA3507DB0FEF9F9D /* Build configuration list for PBXNativeTarget "RuntilWatchWidgets" */;
-			buildPhases = (
-				12DD7769173856C997999ADF /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = RuntilWatchWidgets;
-			packageProductDependencies = (
-			);
-			productName = RuntilWatchWidgets;
-			productReference = 03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		C75ADF53E155B5C229789EE1 /* Runtil */ = {
 			isa = PBXNativeTarget;
@@ -414,10 +358,6 @@
 						DevelopmentTeam = A3N947GGZB;
 						ProvisioningStyle = Automatic;
 					};
-					8F960ED0FE3BAC501F951865 = {
-						DevelopmentTeam = A3N947GGZB;
-						ProvisioningStyle = Automatic;
-					};
 					C75ADF53E155B5C229789EE1 = {
 						DevelopmentTeam = A3N947GGZB;
 						ProvisioningStyle = Automatic;
@@ -443,7 +383,6 @@
 			targets = (
 				C75ADF53E155B5C229789EE1 /* Runtil */,
 				47D6E2D77BCE12AE13EC1C5B /* RuntilWatch */,
-				8F960ED0FE3BAC501F951865 /* RuntilWatchWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -494,15 +433,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		12DD7769173856C997999ADF /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				842FC50A2A7F59323456D74B /* RuntilComplication.swift in Sources */,
-				12FB0DF1740895F40EF5763A /* RuntilWidgetBundle.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		EFDA6AEB5BE845EC4B77F9AB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -533,31 +463,9 @@
 			target = 47D6E2D77BCE12AE13EC1C5B /* RuntilWatch */;
 			targetProxy = 1D17C754EBD6D3F1702656A5 /* PBXContainerItemProxy */;
 		};
-		76879BC69EDCDE45230DBFDA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8F960ED0FE3BAC501F951865 /* RuntilWatchWidgets */;
-			targetProxy = 787B23593965D5FA9701C872 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		06381E7973E3D17B6393524F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = RuntilWatchWidgets/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil.watchkitapp.widgets;
-				PRODUCT_NAME = RuntilWatchWidgets;
-				SDKROOT = watchos;
-				SKIP_INSTALL = NO;
-				TARGETED_DEVICE_FAMILY = 4;
-			};
-			name = Debug;
-		};
 		18D1965A601922597967EC3C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -574,7 +482,7 @@
 		};
 		3427D6FE32EC695648C53188 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_4E166611-8480-4AA1-B485-EEB2F2458DCF" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_B73C458E-5968-45CC-AB34-AD76AD04ED2E" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -655,23 +563,6 @@
 			};
 			name = Release;
 		};
-		57997AA695CB7FAFA32CE3E2 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = RuntilWatchWidgets/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ergilp.runtil.watchkitapp.widgets;
-				PRODUCT_NAME = RuntilWatchWidgets;
-				SDKROOT = watchos;
-				SKIP_INSTALL = NO;
-				TARGETED_DEVICE_FAMILY = 4;
-			};
-			name = Release;
-		};
 		724ADBBB1978FE48658BBFAD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -693,7 +584,7 @@
 		};
 		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_4E166611-8480-4AA1-B485-EEB2F2458DCF" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_B73C458E-5968-45CC-AB34-AD76AD04ED2E" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -798,15 +689,6 @@
 			buildConfigurations = (
 				18D1965A601922597967EC3C /* Debug */,
 				55DB5B6B2BF1130B16B4703D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		E42B8F89FA3507DB0FEF9F9D /* Build configuration list for PBXNativeTarget "RuntilWatchWidgets" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				06381E7973E3D17B6393524F /* Debug */,
-				57997AA695CB7FAFA32CE3E2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

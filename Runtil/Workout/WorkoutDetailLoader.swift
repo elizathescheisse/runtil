@@ -103,7 +103,8 @@ final class WorkoutDetailLoader {
            let humidity = workout.metadata?[HKMetadataKeyWeatherHumidity] as? HKQuantity {
             weather = WeatherSnapshot(
                 temperatureCelsius: temperature.doubleValue(for: .degreeCelsius()),
-                relativeHumidity: humidity.doubleValue(for: .percent())
+                relativeHumidity: humidity.doubleValue(for: .percent()),
+                dewPointCelsius: workout.metadata?[MetadataKey.dewPointCelsius] as? Double
             )
         }
     }

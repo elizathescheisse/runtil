@@ -128,4 +128,90 @@ final class WeatherTests: XCTestCase {
         XCTAssertThrowsError(try WeatherLookup.parse(Data("not json".utf8)))
         XCTAssertThrowsError(try WeatherLookup.parse(Data("{}".utf8)))
     }
+
+    func testParsesDewPointWhenPresent() throws {
+        let json = """
+        {"current":{"temperature_2m":24.0,"relative_humidity_2m":70,"dew_point_2m":18.1}}
+        """.data(using: .utf8)!
+        XCTAssertEqual(try WeatherLookup.parse(json).dewPointCelsius ?? 0, 18.1, accuracy: 0.01)
+    }
+
+    func testFallsBackToDerivedDewPointForOlderRuns() throws {
+        // A response — or a saved run — without dew point still yields one.
+        let json = """
+        {"current":{"temperature_2m":24.0,"relative_humidity_2m":70}}
+        """.data(using: .utf8)!
+        let weather = try WeatherLookup.parse(json)
+        XCTAssertNil(weather.dewPointCelsius)
+        // 24°C at 70% RH is about 18°C dew point.
+        XCTAssertEqual(weather.effectiveDewPointCelsius, 18.1, accuracy: 0.6)
+    }
+}
+
+final class RunningComfortTests: XCTestCase {
+
+    /// The distinction that motivates using dew point at all.
+    func testHotAndDryIsEasierThanCoolerAndMuggy() {
+        // 32°C desert air at 20% humidity — hot, but the sweat evaporates.
+        let hotDry = WeatherSnapshot(temperatureCelsius: 32, relativeHumidity: 0.20)
+        // 26°C at 85% — six degrees cooler and considerably worse to run in.
+        let warmMuggy = WeatherSnapshot(temperatureCelsius: 26, relativeHumidity: 0.85)
+
+        XCTAssertLessThan(hotDry.effectiveDewPointCelsius, warmMuggy.effectiveDewPointCelsius)
+        XCTAssertLessThan(
+            RunningComfort.allCases.firstIndex(of: hotDry.comfort)!,
+            RunningComfort.allCases.firstIndex(of: warmMuggy.comfort)!,
+            "the cooler, muggier day should grade as harder"
+        )
+    }
+
+    func testRelativeHumidityAloneWouldGetItBackwards() {
+        // Both 90% relative humidity. One is a crisp winter morning, the other a swamp —
+        // which is exactly why relative humidity is the wrong number to grade on.
+        let coldDamp = WeatherSnapshot(temperatureCelsius: 5, relativeHumidity: 0.90)
+        let warmDamp = WeatherSnapshot(temperatureCelsius: 25, relativeHumidity: 0.90)
+
+        XCTAssertEqual(coldDamp.relativeHumidity, warmDamp.relativeHumidity)
+        XCTAssertEqual(coldDamp.comfort, .ideal)
+        // 25°C at 90% is a ~23°C dew point — several bands worse, on an identical
+        // humidity reading. That gap is the whole argument for grading on dew point.
+        XCTAssertEqual(warmDamp.comfort, .difficult)
+        XCTAssertGreaterThan(
+            warmDamp.effectiveDewPointCelsius - coldDamp.effectiveDewPointCelsius,
+            15
+        )
+    }
+
+    func testKnownDewPointValues() {
+        // Reference points: at 100% humidity dew point equals air temperature.
+        XCTAssertEqual(
+            WeatherSnapshot.dewPoint(temperatureCelsius: 20, relativeHumidity: 1.0),
+            20, accuracy: 0.2
+        )
+        // 20°C at 50% is about 9.3°C.
+        XCTAssertEqual(
+            WeatherSnapshot.dewPoint(temperatureCelsius: 20, relativeHumidity: 0.50),
+            9.3, accuracy: 0.5
+        )
+        // 30°C at 60% is about 21.4°C.
+        XCTAssertEqual(
+            WeatherSnapshot.dewPoint(temperatureCelsius: 30, relativeHumidity: 0.60),
+            21.4, accuracy: 0.5
+        )
+    }
+
+    func testBandBoundaries() {
+        XCTAssertEqual(RunningComfort(dewPointCelsius: 5), .ideal)
+        XCTAssertEqual(RunningComfort(dewPointCelsius: 12), .comfortable)
+        XCTAssertEqual(RunningComfort(dewPointCelsius: 16), .noticeable)
+        XCTAssertEqual(RunningComfort(dewPointCelsius: 19), .uncomfortable)
+        XCTAssertEqual(RunningComfort(dewPointCelsius: 22), .difficult)
+        XCTAssertEqual(RunningComfort(dewPointCelsius: 26), .oppressive)
+    }
+
+    func testZeroHumidityDoesNotProduceInfinity() {
+        // log(0) is undefined; the guard must keep this finite.
+        let value = WeatherSnapshot.dewPoint(temperatureCelsius: 20, relativeHumidity: 0)
+        XCTAssertTrue(value.isFinite)
+    }
 }

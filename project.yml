@@ -60,19 +60,6 @@ schemes:
     archive:
       config: Release
 
-  RuntilWatchWidgets:
-    build:
-      targets:
-        RuntilWatchWidgets: all
-    run:
-      config: Debug
-    profile:
-      config: Release
-    analyze:
-      config: Debug
-    archive:
-      config: Release
-
 targets:
 
   Runtil:
@@ -104,9 +91,6 @@ targets:
       - path: RuntilWatch
     dependencies:
       - package: RuntilCore
-      - target: RuntilWatchWidgets
-        embed: true
-        codeSign: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ergilp.runtil.watchkitapp
@@ -115,17 +99,4 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "4"
         CODE_SIGN_ENTITLEMENTS: RuntilWatch/RuntilWatch.entitlements
-        SKIP_INSTALL: NO
-
-  RuntilWatchWidgets:
-    type: app-extension
-    platform: watchOS
-    sources:
-      - path: RuntilWatchWidgets
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ergilp.runtil.watchkitapp.widgets
-        PRODUCT_NAME: RuntilWatchWidgets
-        INFOPLIST_FILE: RuntilWatchWidgets/Info.plist
-        TARGETED_DEVICE_FAMILY: "4"
         SKIP_INSTALL: NO

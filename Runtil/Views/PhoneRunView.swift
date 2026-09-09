@@ -27,7 +27,7 @@ struct PhoneRunView: View {
                     }
                 }
             }
-            .navigationTitle("Run")
+            .navigationTitle("runtil")
             .onAppear { mirror.refreshAvailability() }
         }
     }

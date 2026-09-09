@@ -225,6 +225,9 @@ final class LiveMetricSource: NSObject, MetricSource {
             metadata[HKMetadataKeyWeatherHumidity] = HKQuantity(
                 unit: .percent(), doubleValue: weather.relativeHumidity
             )
+            // No HealthKit key exists for dew point, so it goes under our own. Stored as
+            // a plain number because custom metadata must be a property-list type.
+            metadata[MetadataKey.dewPointCelsius] = weather.effectiveDewPointCelsius
         }
         return metadata
     }
