@@ -64,12 +64,20 @@ private struct PlanPickerView: View {
                             Spacer()
 
                             if !controller.canRun(plan) {
-                                // Names what's missing rather than prescribing one fix —
-                                // the plan needs a heart rate from somewhere.
-                                Label("Needs heart rate", systemImage: "heart.slash")
-                                    .font(.caption2)
-                                    .foregroundStyle(.orange)
-                                    .labelStyle(.titleAndIcon)
+                                // Points at the route that's actually open. Someone with a
+                                // watch isn't blocked at all — they're just on the wrong
+                                // device, which "needs heart rate" fails to tell them.
+                                if mirror.availability == .ready {
+                                    Label("Start on watch", systemImage: "applewatch")
+                                        .font(.caption2)
+                                        .foregroundStyle(.blue)
+                                        .labelStyle(.titleAndIcon)
+                                } else {
+                                    Label("Needs heart rate", systemImage: "heart.slash")
+                                        .font(.caption2)
+                                        .foregroundStyle(.orange)
+                                        .labelStyle(.titleAndIcon)
+                                }
                             }
                         }
                         .contentShape(Rectangle())
@@ -84,30 +92,32 @@ private struct PlanPickerView: View {
             }
 
             Section {
-                LabeledContent("Live from watch") {
+                LabeledContent {
                     Text(mirror.availability == .ready ? "Ready" : "Unavailable")
                         .foregroundStyle(mirror.availability == .ready ? .green : .secondary)
+                } label: {
+                    Label("Apple Watch", systemImage: "applewatch")
                 }
                 if let explanation = mirror.availability.explanation {
                     Text(explanation)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-            } header: {
-                Text("Apple Watch")
-            } footer: {
-                Text("Start a run on your watch and it appears here live, with heart rate from your wrist. The watch keeps the session and plays the cues.")
-            }
 
-            Section("Heart rate") {
                 NavigationLink {
                     HeartRateMonitorView(monitor: controller.monitor)
                 } label: {
-                    LabeledContent("Monitor") {
+                    LabeledContent {
                         Text(controller.monitor.state.description)
                             .foregroundStyle(controller.monitor.state.isConnected ? .green : .secondary)
+                    } label: {
+                        Label("Bluetooth monitor", systemImage: "sensor.tag.radiowaves.forward")
                     }
                 }
+            } header: {
+                Text("Heart rate source")
+            } footer: {
+                Text("Either one unlocks heart-rate plans — you don't need both.\n\n**Apple Watch:** start the plan on your watch. It runs the session, buzzes your wrist, and appears here live.\n\n**Bluetooth monitor:** a chest strap or armband paired to your phone. Start the plan here, and cues come through your headphones.")
             }
 
             Section {
