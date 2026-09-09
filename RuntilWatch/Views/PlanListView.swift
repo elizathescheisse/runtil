@@ -6,6 +6,13 @@ struct PlanListView: View {
     let controller: WorkoutController
 
     @State private var selectedPlan: WorkoutPlan?
+    /// Which plan this presentation already started.
+    ///
+    /// `.task` re-fires whenever the presented view's body changes — which happens the
+    /// instant a run finishes and the screen switches to the summary. Guarding on "is a
+    /// run active" is not enough, because a finished run isn't active, so ending a run
+    /// immediately started another one.
+    @State private var startedRunID: UUID?
     @State private var editingPlan: WorkoutPlan?
     @State private var useSimulation = Self.runningInSimulator
 
@@ -81,11 +88,18 @@ struct PlanListView: View {
             }
         }
         .navigationTitle("runtil")
-        .fullScreenCover(item: $selectedPlan) { plan in
+        .fullScreenCover(item: $selectedPlan, onDismiss: {
+            startedRunID = nil
+            // Leaving a finished run returns the controller to idle, so the next plan
+            // tapped starts cleanly.
+            if controller.state == .finished { controller.reset() }
+        }) { plan in
             ActiveWorkoutView(controller: controller, store: store)
                 .task {
-                    print("[runtil] cover .task fired for \(plan.name) — isActive=\(controller.isActive)")
-                    // Re-entering a run in progress should show it, not start it again.
+                    // Once per presentation, whatever SwiftUI does to the body afterwards.
+                    guard startedRunID != plan.id else { return }
+                    startedRunID = plan.id
+                    // And never on top of a run already going — re-entering shows it.
                     guard !controller.isActive else { return }
                     await controller.start(plan: plan, simulated: useSimulation)
                 }
