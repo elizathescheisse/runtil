@@ -65,6 +65,18 @@ private struct MetricsPage: View {
     private var units: DistanceUnit { controller.plan?.units ?? .miles }
 
     var body: some View {
+        // While a change of effort is being asked for, the whole page is the instruction.
+        // A haptic phrase only means something once you've learned it; one word read at
+        // arm's length means something the first time. The numbers are one swipe away and
+        // nobody needs them in the two seconds after a buzz.
+        if controller.isPromptingEffortChange {
+            EffortPrompt(kind: controller.currentSegment?.kind ?? .run)
+        } else {
+            metrics
+        }
+    }
+
+    private var metrics: some View {
         // Scrolls so a small watch, a long plan name or a large text size can never clip
         // the numbers off the edge — this is the screen you glance at mid-stride.
         ScrollView {
@@ -113,6 +125,37 @@ private struct MetricsPage: View {
             .font(.caption)
             .padding(.horizontal, 2)
         }
+    }
+}
+
+/// One word, as large as the watch will draw it.
+///
+/// Deliberately holds nothing else: this appears in the seconds right after a haptic
+/// phrase, when the only question is "run or walk?" and it should be answerable from a
+/// glance with the arm still swinging.
+private struct EffortPrompt: View {
+    let kind: SegmentKind
+
+    @State private var emphasised = false
+
+    var body: some View {
+        // Two-word kinds stack rather than shrink — "WARM UP" over two lines stays as
+        // legible at arm's length as "RUN" does on one.
+        Text(kind.displayName.uppercased().replacingOccurrences(of: " ", with: "\n"))
+            .font(.system(size: 60, weight: .black, design: .rounded))
+            .multilineTextAlignment(.center)
+            .lineSpacing(-8)
+            .minimumScaleFactor(0.45)
+            .lineLimit(2)
+            .foregroundStyle(kind.isEffort ? Color.green : Color.orange)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            // A slow pulse says the instruction is still outstanding — it stops when your
+            // pace confirms the change and this view is replaced by the metrics.
+            .opacity(emphasised ? 1 : 0.55)
+            .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: emphasised)
+            .onAppear { emphasised = true }
+            .accessibilityLabel(Text(kind.displayName))
     }
 }
 

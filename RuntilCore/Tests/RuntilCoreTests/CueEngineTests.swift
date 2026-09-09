@@ -302,6 +302,79 @@ final class EffortConfirmationTests: XCTestCase {
         XCTAssertEqual(repeatCount(recorder), 0)
     }
 
+    /// Runs a plan and reports, per second, whether the screen would be showing the big
+    /// RUN / WALK prompt.
+    private func promptTimeline(
+        engine: CueEngine,
+        seconds: Int,
+        metersPerSecond: (Int, SegmentKind?) -> Double
+    ) -> [Bool] {
+        var timeline: [Bool] = []
+        var distance = 0.0
+        for second in 0...seconds {
+            let speed = metersPerSecond(second, engine.currentSegment?.kind)
+            if second > 0 { distance += speed }
+            _ = engine.advance(
+                Tick(elapsed: TimeInterval(second), totalDistance: distance,
+                     heartRate: 130, instantPace: speed > 0 ? 1.0 / speed : nil)
+            )
+            timeline.append(engine.isPromptingEffortChange)
+        }
+        return timeline
+    }
+
+    func testPromptAppearsAtTheCueAndClearsOnceYouComply() {
+        let engine = CueEngine(plan: plan())
+        let timeline = promptTimeline(engine: engine, seconds: 60) { _, kind in
+            (kind?.isEffort ?? true) ? 3.0 : 1.4
+        }
+
+        XCTAssertTrue(timeline[0], "the opening cue should put RUN on screen")
+        // Pace needs a few samples before it can confirm anything, but not many.
+        XCTAssertFalse(timeline[15], "running should clear the prompt promptly")
+        XCTAssertFalse(
+            timeline[16...60].contains(true),
+            "a compliant runner should never see the prompt again mid-segment"
+        )
+    }
+
+    func testPromptReappearsAtTheNextSegment() {
+        // 120s run then 120s walk, complying with both.
+        let engine = CueEngine(plan: plan())
+        let timeline = promptTimeline(engine: engine, seconds: 200) { _, kind in
+            (kind?.isEffort ?? true) ? 3.0 : 1.4
+        }
+        XCTAssertTrue(timeline[120], "the walk cue should put WALK on screen")
+        XCTAssertTrue(
+            timeline[121...135].contains(false),
+            "and it should clear again once you're walking"
+        )
+    }
+
+    func testPromptGivesUpWhenYouNeverComply() {
+        // Keeps running straight through the walk cue. The word must not sit there for
+        // the rest of the segment — an instruction nobody is going to follow, or a
+        // threshold that's simply wrong for this person, has to time out like the nagging.
+        let engine = CueEngine(plan: plan(repeatAfter: 5, maxRepeats: 2))
+        let timeline = promptTimeline(engine: engine, seconds: 200) { _, _ in 3.0 }
+
+        XCTAssertTrue(timeline[120], "the walk cue should still show")
+        XCTAssertFalse(timeline[119 + 5 * 3 + 2], "and should give up on schedule")
+    }
+
+    func testPromptClearsWithoutPaceData() {
+        // Indoors: nothing can ever confirm. Bounded by the same window.
+        let engine = CueEngine(plan: plan(repeatAfter: 5, maxRepeats: 2))
+        var timeline: [Bool] = []
+        for second in 0...60 {
+            _ = engine.advance(Tick(elapsed: TimeInterval(second), totalDistance: 0,
+                                    heartRate: 130, instantPace: nil))
+            timeline.append(engine.isPromptingEffortChange)
+        }
+        XCTAssertTrue(timeline[0])
+        XCTAssertFalse(timeline[30], "no pace must not mean a permanent instruction")
+    }
+
     func testThresholdClassifiesPaces() {
         let confirmation = EffortConfirmation()
         // 3 m/s is running; 1.4 m/s is walking.

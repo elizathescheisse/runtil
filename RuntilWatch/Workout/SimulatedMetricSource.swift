@@ -24,7 +24,21 @@ final class SimulatedMetricSource: MetricSource {
         /// Wall-clock seconds per simulated second. 0.1 runs a 20-minute workout in two.
         var timeScale: Double = 0.1
 
-        static let `default` = Profile()
+        /// Launch with `-speed 1` to run the simulation in real time.
+        ///
+        /// The default 10× is right for exercising a whole plan quickly, but it turns
+        /// every transition into a single frame — useless for checking what the screen
+        /// actually does in the seconds after a cue.
+        static var `default`: Profile {
+            var profile = Profile()
+            let arguments = ProcessInfo.processInfo.arguments
+            if let index = arguments.firstIndex(of: "-speed"),
+               arguments.indices.contains(index + 1),
+               let scale = Double(arguments[index + 1]), scale > 0 {
+                profile.timeScale = 1.0 / scale
+            }
+            return profile
+        }
     }
 
     /// Told by the controller what the plan currently expects, which is what makes the

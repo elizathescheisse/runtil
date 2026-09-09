@@ -34,6 +34,27 @@ public final class CueEngine {
     public private(set) var projectedHeartRate: Int?
     public private(set) var heartRateSlope: Double = 0   // bpm per second
     public private(set) var rollingPace: Double?         // seconds per meter
+    private var lastElapsed: TimeInterval = 0
+
+    /// Whether the runner is still being asked to change effort and hasn't yet.
+    ///
+    /// Drives a large RUN / WALK prompt on the watch. Haptic rhythm has to be learned, and
+    /// until it is, a glance should answer "what am I meant to be doing" without decoding
+    /// anything — so the screen says it in a word for as long as the question is live.
+    ///
+    /// Bounded, so a run with no pace data doesn't sit under a permanent instruction: it
+    /// clears the moment your pace confirms the change, or when the nagging would have
+    /// given up anyway.
+    public var isPromptingEffortChange: Bool {
+        guard !effortConfirmed, currentSegment != nil else { return false }
+        let window: TimeInterval
+        if let confirmation = plan.advisories.effortConfirmation {
+            window = confirmation.repeatAfter * Double(confirmation.maxRepeats + 1)
+        } else {
+            window = 12
+        }
+        return (lastElapsed - segmentStartElapsed) < window
+    }
 
     public let plan: WorkoutPlan
 
@@ -157,6 +178,7 @@ public final class CueEngine {
             ? nil
             : paceHistory.map(\.pace).reduce(0, +) / Double(paceHistory.count)
 
+        lastElapsed = tick.elapsed
         observeLagResponse(at: tick.elapsed)
     }
 
@@ -259,6 +281,7 @@ public final class CueEngine {
         var cues: [Cue] = []
         let inSegment = tick.elapsed - segmentStartElapsed
 
+        updateEffortConfirmation(segment)
         cues.append(contentsOf: effortConfirmationCues(segment, tick: tick, inSegment: inSegment))
         cues.append(contentsOf: countdownCues(segment, inSegment: inSegment))
         cues.append(contentsOf: heartRateCues(segment, tick: tick))
@@ -266,6 +289,18 @@ public final class CueEngine {
         cues.append(contentsOf: paceCues(segment, tick: tick, inSegment: inSegment))
         cues.append(contentsOf: splitCues(tick))
         return cues
+    }
+
+    /// Notices compliance as soon as the pace agrees.
+    ///
+    /// Checked every tick rather than only when a repeat falls due, so the on-screen
+    /// prompt clears the moment you start running instead of lingering until the next
+    /// scheduled nag.
+    private func updateEffortConfirmation(_ segment: Segment) {
+        guard !effortConfirmed, let confirmation = plan.advisories.effortConfirmation else { return }
+        if confirmation.matchesEffort(segment.kind, pace: paceSinceSegmentStart) == true {
+            effortConfirmed = true
+        }
     }
 
     /// Repeats "start running" or "start walking" until your pace shows you did.

@@ -23,6 +23,18 @@ final class WorkoutController {
     private(set) var latestTick: Tick?
     private(set) var elapsed: TimeInterval = 0
 
+    /// True from the moment a segment cue fires until your pace shows you've obeyed it.
+    ///
+    /// Haptic rhythm has to be learned, and until it is, a glance down should answer the
+    /// question in a word.
+    ///
+    /// Stored rather than read through to the engine: `CueEngine` is deliberately plain
+    /// Foundation and isn't observable, so a view driven *only* by engine state would
+    /// render once and then never update. Every other engine value on this controller gets
+    /// away with it by sharing a body with `latestTick`; the RUN / WALK screen shows
+    /// nothing else, so it has to be told.
+    private(set) var isPromptingEffortChange = false
+
     let haptics = HapticPlayer()
 
     /// True when driven by `SimulatedMetricSource`, which surfaces the cue log in the UI —
@@ -150,7 +162,12 @@ final class WorkoutController {
                 self.latestTick = tick
                 self.elapsed = tick.elapsed
 
-                for cue in engine.advance(tick) {
+                let cues = engine.advance(tick)
+                // After advancing, so the prompt appears on the same tick as its cue and
+                // clears on the tick your pace confirms it. Paused runs ask nothing of you.
+                self.isPromptingEffortChange = self.state == .running && engine.isPromptingEffortChange
+
+                for cue in cues {
                     self.haptics.play(cue, elapsed: tick.elapsed)
                     if self.lastCue == nil || cue.priority >= (self.lastCue?.priority ?? 0) {
                         self.lastCue = cue
@@ -191,6 +208,7 @@ final class WorkoutController {
     }
 
     func pause() {
+        isPromptingEffortChange = false
         guard state == .running else { return }
         state = .paused
     }
@@ -217,6 +235,7 @@ final class WorkoutController {
         // and gating the screen on them means one slow call leaves you staring at a run
         // you already ended, pressing a button that appears to do nothing.
         state = .finished
+        isPromptingEffortChange = false
 
         let finishing = source
         source = nil
@@ -228,6 +247,7 @@ final class WorkoutController {
         engine = nil
         latestTick = nil
         elapsed = 0
+        isPromptingEffortChange = false
         state = .idle
         haptics.reset()
     }
