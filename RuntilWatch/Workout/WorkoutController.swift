@@ -78,7 +78,16 @@ final class WorkoutController {
 
     // MARK: Lifecycle
 
+    /// True while a workout session is live, including paused.
+    var isActive: Bool {
+        state == .running || state == .paused
+    }
+
     func start(plan: WorkoutPlan, simulated: Bool) async {
+        // Starting a second run over a live one would orphan the first session, which
+        // keeps holding the watch's only workout slot with no way to reach it.
+        guard !isActive else { return }
+
         let engine = CueEngine(plan: plan)
         self.engine = engine
         self.isSimulated = simulated

@@ -23,6 +23,30 @@ struct PlanListView: View {
 
     var body: some View {
         List {
+            // Leaving the run screen doesn't stop the run, so there has to be a way back
+            // to it — without this the session keeps going with no reachable End button.
+            if controller.isActive, let running = controller.plan {
+                Section {
+                    Button {
+                        selectedPlan = running
+                    } label: {
+                        HStack(spacing: 9) {
+                            Image(systemName: "figure.run.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.green)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Run in progress")
+                                    .font(.headline)
+                                Text(running.name)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+                }
+            }
+
             Section {
                 ForEach(store.plans) { plan in
                     Button {
@@ -59,7 +83,11 @@ struct PlanListView: View {
         .navigationTitle("runtil")
         .fullScreenCover(item: $selectedPlan) { plan in
             ActiveWorkoutView(controller: controller, store: store)
-                .task { await controller.start(plan: plan, simulated: useSimulation) }
+                .task {
+                    // Re-entering a run in progress should show it, not start it again.
+                    guard !controller.isActive else { return }
+                    await controller.start(plan: plan, simulated: useSimulation)
+                }
         }
         .sheet(item: $editingPlan) { plan in
             NavigationStack {
