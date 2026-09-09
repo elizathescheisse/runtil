@@ -32,6 +32,8 @@ final class WorkoutController {
 
     private var source: MetricSource?
     private var consumeTask: Task<Void, Never>?
+    private var cueSequence = 0
+    private var lastCue: Cue?
 
     // MARK: Live readouts
 
@@ -141,13 +143,15 @@ final class WorkoutController {
                 self.latestTick = tick
                 self.elapsed = tick.elapsed
 
-                var latestCue: Cue?
                 for cue in engine.advance(tick) {
                     self.haptics.play(cue, elapsed: tick.elapsed)
-                    if latestCue == nil { latestCue = cue }
+                    if self.lastCue == nil || cue.priority >= (self.lastCue?.priority ?? 0) {
+                        self.lastCue = cue
+                        self.cueSequence += 1
+                    }
                     if case .workoutComplete = cue { await self.finish() }
                 }
-                self.mirrorToPhone(lastCue: latestCue)
+                self.mirrorToPhone()
             }
         }
     }
@@ -156,7 +160,7 @@ final class WorkoutController {
     ///
     /// Once per tick, and entirely optional — the watch holds the session, reads the
     /// sensors and plays the cues regardless of whether a phone is anywhere nearby.
-    private func mirrorToPhone(lastCue: Cue?) {
+    private func mirrorToPhone() {
         guard let live = source as? LiveMetricSource, let engine, let plan else { return }
         live.mirror(
             MirroredState(
@@ -172,6 +176,8 @@ final class WorkoutController {
                 paceSecondsPerMeter: rollingPace,
                 units: plan.units,
                 lastCueSummary: lastCue?.summary,
+                lastCue: lastCue,
+                cueSequence: cueSequence,
                 isFinished: state == .finished
             )
         )

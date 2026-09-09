@@ -20,8 +20,13 @@ public struct MirroredState: Codable, Hashable, Sendable {
     public var distanceMeters: Double
     public var paceSecondsPerMeter: Double?
     public var units: DistanceUnit
-    /// The most recent cue, so the phone can show what your wrist was just told.
+    /// The most recent cue, so the phone can show — and speak — what your wrist was
+    /// just told.
     public var lastCueSummary: String?
+    public var lastCue: Cue?
+    /// Increments once per cue. Snapshots arrive every second carrying the same last cue,
+    /// so without this the phone would repeat "Run" until the next segment.
+    public var cueSequence: Int
     public var isFinished: Bool
 
     public init(
@@ -37,6 +42,8 @@ public struct MirroredState: Codable, Hashable, Sendable {
         paceSecondsPerMeter: Double?,
         units: DistanceUnit,
         lastCueSummary: String?,
+        lastCue: Cue? = nil,
+        cueSequence: Int = 0,
         isFinished: Bool
     ) {
         self.planName = planName
@@ -51,6 +58,8 @@ public struct MirroredState: Codable, Hashable, Sendable {
         self.paceSecondsPerMeter = paceSecondsPerMeter
         self.units = units
         self.lastCueSummary = lastCueSummary
+        self.lastCue = lastCue
+        self.cueSequence = cueSequence
         self.isFinished = isFinished
     }
 

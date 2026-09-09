@@ -9,6 +9,7 @@ import RuntilCore
 struct MirroredRunView: View {
     let state: MirroredState
     let isActive: Bool
+    var spokenCuesEnabled: Binding<Bool>? = nil
 
     var body: some View {
         VStack(spacing: 18) {
@@ -55,9 +56,14 @@ struct MirroredRunView: View {
                     .background(.quaternary, in: Capsule())
             }
 
+            if let spokenCuesEnabled {
+                Toggle("Speak cues", isOn: spokenCuesEnabled)
+                    .padding(.horizontal, 24)
+            }
+
             Spacer()
 
-            Text("Controls stay on the watch — it's the device running the session.")
+            Text("Controls stay on the watch — it's the device running the session. Your phone adds the one thing a watch can't: a voice in your headphones.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

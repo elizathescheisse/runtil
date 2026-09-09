@@ -28,7 +28,7 @@ public struct Tick: Hashable, Sendable {
 }
 
 /// Something the runner should be told about.
-public enum Cue: Hashable, Sendable {
+public enum Cue: Hashable, Sendable, Codable {
     /// A new segment just started — the main event.
     case beginSegment(kind: SegmentKind, index: Int, cycle: Int)
     /// Countdown before a timed segment ends.

@@ -50,8 +50,14 @@ final class MirroredWorkoutObserver: NSObject {
     private(set) var isActive = false
     private(set) var availability: Availability = .checking
 
+    /// Speaks cues while the watch runs the session. The watch handles heart rate and
+    /// haptics; the phone contributes the thing a watch can't — a voice in your headphones.
+    private let audio = AudioCuePlayer()
+    var spokenCuesEnabled = true
+
     private let store = HKHealthStore()
     private var session: HKWorkoutSession?
+    private var lastSpokenSequence = 0
 
     override init() {
         super.init()
@@ -105,6 +111,22 @@ final class MirroredWorkoutObserver: NSObject {
         session = mirrored
         mirrored.delegate = self
         isActive = true
+        lastSpokenSequence = 0
+        // Background audio is declared, so this keeps working with the phone pocketed.
+        try? audio.activate()
+    }
+
+    /// Speaks a cue once, the first time its sequence number is seen.
+    ///
+    /// Snapshots arrive every second carrying the same last cue, so without the sequence
+    /// check the phone would repeat "Run" until the next segment change.
+    private func speakIfNew(_ state: MirroredState) {
+        guard spokenCuesEnabled,
+              state.cueSequence > lastSpokenSequence,
+              let cue = state.lastCue
+        else { return }
+        lastSpokenSequence = state.cueSequence
+        audio.play(cue, units: state.units)
     }
 }
 
@@ -136,6 +158,7 @@ extension MirroredWorkoutObserver: HKWorkoutSessionDelegate {
         Task { @MainActor in
             self.state = newest
             self.isActive = !newest.isFinished
+            self.speakIfNew(newest)
         }
     }
 
@@ -150,6 +173,7 @@ extension MirroredWorkoutObserver: HKWorkoutSessionDelegate {
     private func finish() {
         isActive = false
         session = nil
+        audio.deactivate()
         // The last snapshot is kept so the screen doesn't blank the instant a run ends.
     }
 

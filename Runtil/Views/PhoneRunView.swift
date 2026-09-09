@@ -13,7 +13,14 @@ struct PhoneRunView: View {
                 // A run on the wrist wins the screen: the watch owns the session, and
                 // showing the plan list underneath it would invite starting a second one.
                 if let mirrored = mirror.state, mirror.isActive {
-                    MirroredRunView(state: mirrored, isActive: true)
+                    MirroredRunView(
+                        state: mirrored,
+                        isActive: true,
+                        spokenCuesEnabled: Binding(
+                            get: { mirror.spokenCuesEnabled },
+                            set: { mirror.spokenCuesEnabled = $0 }
+                        )
+                    )
                 } else {
                     switch controller.state {
                     case .idle:
