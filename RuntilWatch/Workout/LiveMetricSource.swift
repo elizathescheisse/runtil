@@ -28,6 +28,9 @@ final class LiveMetricSource: NSObject, MetricSource {
 
     var onFailure: ((SourceFailure) -> Void)?
 
+    /// Whether the phone is currently receiving a live copy of this run.
+    private(set) var isMirroring = false
+
     /// When false the run is discarded at the end instead of saved, so a second app
     /// recording the same run doesn't produce a duplicate workout in Health.
     private let savesToHealth: Bool
@@ -134,6 +137,8 @@ final class LiveMetricSource: NSObject, MetricSource {
             throw SourceError.anotherWorkoutRunning
         }
 
+        await startMirroring(session)
+
         locationManager.requestWhenInUseAuthorization()
         // Without this, location updates stop the moment the screen sleeps — which would
         // lose both the route and pace cues for most of the run.
@@ -141,6 +146,26 @@ final class LiveMetricSource: NSObject, MetricSource {
         locationManager.startUpdatingLocation()
 
         startTicking()
+    }
+
+    /// Offers the phone a live copy of the run.
+    ///
+    /// Best-effort: a run must never depend on the phone being present, reachable, or even
+    /// owned. Failure here is silent because the watch is doing the actual work either way.
+    private func startMirroring(_ session: HKWorkoutSession) async {
+        do {
+            try await session.startMirroringToCompanionDevice()
+            isMirroring = true
+        } catch {
+            isMirroring = false
+        }
+    }
+
+    /// Pushes a snapshot to the phone. Dropped silently if mirroring isn't running —
+    /// this is a display update, never something a cue waits on.
+    func mirror(_ state: MirroredState) {
+        guard isMirroring, let session, let data = try? state.encoded() else { return }
+        Task { try? await session.sendToRemoteWorkoutSession(data: data) }
     }
 
     /// Emits at a steady 1 Hz regardless of when samples happen to arrive, so the engine

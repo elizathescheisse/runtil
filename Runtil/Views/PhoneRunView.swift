@@ -5,22 +5,30 @@ import RuntilCore
 struct PhoneRunView: View {
     @Bindable var library: PlanLibrary
     @Bindable var controller: PhoneWorkoutController
+    @Bindable var mirror: MirroredWorkoutObserver
 
     var body: some View {
         NavigationStack {
             Group {
-                switch controller.state {
-                case .idle:
-                    PlanPickerView(library: library, controller: controller)
-                case .finished:
-                    RunSummaryView(controller: controller)
-                case .failed(let message):
-                    ContentUnavailableView("Couldn't start", systemImage: "exclamationmark.triangle", description: Text(message))
-                default:
-                    ActiveRunView(controller: controller)
+                // A run on the wrist wins the screen: the watch owns the session, and
+                // showing the plan list underneath it would invite starting a second one.
+                if let mirrored = mirror.state, mirror.isActive {
+                    MirroredRunView(state: mirrored, isActive: true)
+                } else {
+                    switch controller.state {
+                    case .idle:
+                        PlanPickerView(library: library, controller: controller, mirror: mirror)
+                    case .finished:
+                        RunSummaryView(controller: controller)
+                    case .failed(let message):
+                        ContentUnavailableView("Couldn't start", systemImage: "exclamationmark.triangle", description: Text(message))
+                    default:
+                        ActiveRunView(controller: controller)
+                    }
                 }
             }
             .navigationTitle("Run")
+            .onAppear { mirror.refreshAvailability() }
         }
     }
 }
@@ -30,6 +38,7 @@ struct PhoneRunView: View {
 private struct PlanPickerView: View {
     @Bindable var library: PlanLibrary
     @Bindable var controller: PhoneWorkoutController
+    @Bindable var mirror: MirroredWorkoutObserver
 
     var body: some View {
         List {
@@ -72,6 +81,22 @@ private struct PlanPickerView: View {
                 Text("Start a run")
             } footer: {
                 Text("Tap a plan to start tracking. Editing plans happens in the Plans tab.\n\nTime, distance and pace work on their own. Heart-rate plans need a live reading — either a paired Bluetooth monitor, or start the plan from the runtil watch app, which has the sensor on your wrist.")
+            }
+
+            Section {
+                LabeledContent("Live from watch") {
+                    Text(mirror.availability == .ready ? "Ready" : "Unavailable")
+                        .foregroundStyle(mirror.availability == .ready ? .green : .secondary)
+                }
+                if let explanation = mirror.availability.explanation {
+                    Text(explanation)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Apple Watch")
+            } footer: {
+                Text("Start a run on your watch and it appears here live, with heart rate from your wrist. The watch keeps the session and plays the cues.")
             }
 
             Section("Heart rate") {

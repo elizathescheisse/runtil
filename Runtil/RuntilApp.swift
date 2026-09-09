@@ -4,11 +4,14 @@ import SwiftUI
 struct RuntilApp: App {
     @State private var library = PlanLibrary()
     @State private var runController = PhoneWorkoutController()
+    /// Created at launch, not lazily: the phone can be woken in the background purely to
+    /// receive a mirrored session, and the handler has to already be in place when it is.
+    @State private var mirror = MirroredWorkoutObserver()
 
     var body: some Scene {
         WindowGroup {
             TabView {
-                PhoneRunView(library: library, controller: runController)
+                PhoneRunView(library: library, controller: runController, mirror: mirror)
                     .tabItem { Label("Run", systemImage: "figure.run") }
                 PlanLibraryView(library: library)
                     .tabItem { Label("Plans", systemImage: "list.bullet") }

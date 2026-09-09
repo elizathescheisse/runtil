@@ -132,12 +132,40 @@ final class WorkoutController {
                 self.latestTick = tick
                 self.elapsed = tick.elapsed
 
+                var latestCue: Cue?
                 for cue in engine.advance(tick) {
                     self.haptics.play(cue, elapsed: tick.elapsed)
+                    if latestCue == nil { latestCue = cue }
                     if case .workoutComplete = cue { await self.finish() }
                 }
+                self.mirrorToPhone(lastCue: latestCue)
             }
         }
+    }
+
+    /// Sends the phone a snapshot of the run, if it's listening.
+    ///
+    /// Once per tick, and entirely optional — the watch holds the session, reads the
+    /// sensors and plays the cues regardless of whether a phone is anywhere nearby.
+    private func mirrorToPhone(lastCue: Cue?) {
+        guard let live = source as? LiveMetricSource, let engine, let plan else { return }
+        live.mirror(
+            MirroredState(
+                planName: plan.name,
+                elapsed: elapsed,
+                segmentKind: currentSegment?.kind,
+                cycle: engine.cycle,
+                timeInSegment: timeInSegment,
+                timeRemainingInSegment: timeRemainingInSegment,
+                heartRate: heartRate,
+                projectedHeartRate: projectedHeartRate,
+                distanceMeters: distance,
+                paceSecondsPerMeter: rollingPace,
+                units: plan.units,
+                lastCueSummary: lastCue?.summary,
+                isFinished: state == .finished
+            )
+        )
     }
 
     func pause() {
