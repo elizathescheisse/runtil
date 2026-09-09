@@ -178,6 +178,15 @@ private struct ControlsPage: View {
                 set: { controller.haptics.hapticsEnabled = $0 }
             ))
             .font(.caption)
+
+            // Only worth showing when the plan can actually produce pace cues.
+            if controller.plan?.advisories.paceTarget != nil {
+                Toggle("Mute pace", isOn: Binding(
+                    get: { controller.haptics.paceCuesMuted },
+                    set: { controller.haptics.paceCuesMuted = $0 }
+                ))
+                .font(.caption)
+            }
         }
         .padding(.horizontal, 4)
     }

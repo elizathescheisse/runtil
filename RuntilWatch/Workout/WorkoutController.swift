@@ -54,6 +54,22 @@ final class WorkoutController {
         return max(0, total - timeInSegment)
     }
 
+    /// Whether the pace band was set too tight, judged against what this run actually did.
+    /// Reported for the effort segment, which is the one being paced.
+    var paceSuggestion: (kind: SegmentKind, suggestion: PaceCalibration.Suggestion)? {
+        guard let engine, let target = engine.plan.advisories.paceTarget else { return nil }
+        for (kind, observed) in engine.paceObservations {
+            guard let band = target.bandsByKind[kind] else { continue }
+            let suggestion = PaceCalibration.suggest(
+                observed: observed,
+                band: band,
+                cueCount: engine.paceCueCounts[kind] ?? 0
+            )
+            if let suggestion, suggestion.isWorthOffering { return (kind, suggestion) }
+        }
+        return nil
+    }
+
     /// What the lag looks like measured against *this* run, once there's enough to say.
     var measuredLagSuggestion: TimeInterval? {
         guard let engine, engine.lagObservations.count >= 2 else { return nil }

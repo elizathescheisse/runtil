@@ -259,7 +259,7 @@ final class AdvisoryTests: XCTestCase {
     func testPaceCuesRespectGracePeriod() {
         var plan = WorkoutPlan.timedIntervals(run: 600, walk: 60, repeatCount: 1, zones: testZones)
         plan.advisories.paceTarget = PaceTarget(
-            bandsByKind: [.run: PaceTarget.band(fastest: 8 * 60, slowest: 10 * 60, per: .miles)],
+            bandsByKind: [.run: .perUnit(target: 9 * 60, tolerance: 60, unit: .miles)],
             window: 10,
             cooldown: 30,
             graceAfterSegmentStart: 20
@@ -277,7 +277,7 @@ final class AdvisoryTests: XCTestCase {
     func testMissingGPSProducesNoPaceCues() {
         var plan = WorkoutPlan.timedIntervals(run: 600, walk: 60, repeatCount: 1, zones: testZones)
         plan.advisories.paceTarget = PaceTarget(
-            bandsByKind: [.run: PaceTarget.band(fastest: 8 * 60, slowest: 10 * 60, per: .miles)]
+            bandsByKind: [.run: .perUnit(target: 9 * 60, tolerance: 60, unit: .miles)]
         )
         let engine = CueEngine(plan: plan)
 

@@ -18,6 +18,11 @@ final class PhoneCuePlayer {
     private(set) var log: [CueLogEntry] = []
     var hapticsEnabled = true
 
+    /// Silences pace nudges for the rest of the run without touching segment changes.
+    /// Muted cues are still logged, so the summary can still report how often the band
+    /// was breached.
+    var paceCuesMuted = false
+
     private let audio = AudioCuePlayer()
     private var engine: CHHapticEngine?
     private var lastPlayed: Date = .distantPast
@@ -74,6 +79,11 @@ final class PhoneCuePlayer {
     }
 
     func play(_ cue: Cue, elapsed: TimeInterval, units: DistanceUnit) {
+        if paceCuesMuted, cue.isPaceCue {
+            record(cue, elapsed: elapsed, played: false)
+            return
+        }
+
         // Same rule as the watch: a cue arriving on top of a more important one is
         // dropped, never queued, because two cues a second apart can't be told apart.
         let sinceLast = Date().timeIntervalSince(lastPlayed)

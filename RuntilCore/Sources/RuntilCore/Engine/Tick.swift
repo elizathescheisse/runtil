@@ -61,6 +61,15 @@ public enum Cue: Hashable, Sendable {
         }
     }
 
+    /// Pace nudges can be silenced mid-run independently of everything else, since a band
+    /// set too tight is the cue most likely to turn into noise.
+    public var isPaceCue: Bool {
+        switch self {
+        case .paceTooFast, .paceTooSlow: return true
+        default: return false
+        }
+    }
+
     /// Short line for the on-screen cue log.
     public var summary: String {
         switch self {

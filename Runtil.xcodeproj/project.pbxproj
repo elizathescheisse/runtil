@@ -16,6 +16,7 @@
 		156BC565F1E68BDDBCC80438 /* PlanEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6617399D8914BA4A3FC2D781 /* PlanEditView.swift */; };
 		16DDA85CA31CC334287FB621 /* AudioCuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64DFF3FE46FF2006EBA895E6 /* AudioCuePlayer.swift */; };
 		1970B5B4ACA925551BEE8F8C /* MetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944ACAB8D886C6176D27B6AB /* MetricSource.swift */; };
+		1E00ED1818809DB003BF0891 /* WorkoutDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BE87DAE855ED941B1A504F /* WorkoutDetailView.swift */; };
 		3162BCD643E4036EE9EC4526 /* HapticPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = D63A7DDAC291ACC3EA69131C /* HapticPattern.swift */; };
 		339CF5BDCE9C06FF0E4A625F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3DC1968BF34410F191AF49D9 /* Assets.xcassets */; };
 		3CFA555A1EE268C66D869F6B /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */; };
@@ -42,6 +43,7 @@
 		C97A7E878B456000259E4836 /* PlanLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */; };
 		DD713777535026738B2D2B61 /* PlanListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D293FD97FF4EBB2E41BADC6B /* PlanListView.swift */; };
 		E59B465D2B04745566AC6D54 /* LiveMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A579684E851BF38336702E /* LiveMetricSource.swift */; };
+		E7A43C277C464DB78470FB36 /* WorkoutDetailLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C84BD756A47C8C1E76505E2 /* WorkoutDetailLoader.swift */; };
 		E7EE277BF9FFB8C559AC8733 /* PlanEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD86FE4742FED4907B7F9560 /* PlanEntity.swift */; };
 		F5E4AFBC2C2648CDAC7BFA90 /* PlanFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA7EA12B1E0B30BC1851AA3B /* PlanFile.swift */; };
 		FCBB546C764F7EB594C90228 /* RuntilWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62FA09B698D4DF2926B593A /* RuntilWatchApp.swift */; };
@@ -91,6 +93,7 @@
 
 /* Begin PBXFileReference section */
 		03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RuntilWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		04BE87DAE855ED941B1A504F /* WorkoutDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDetailView.swift; sourceTree = "<group>"; };
 		14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStore.swift; sourceTree = "<group>"; };
 		15CD8AC1B818AC8B6321B2A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		19032F4F78EBD6799732D36A /* PhoneRunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneRunView.swift; sourceTree = "<group>"; };
@@ -110,6 +113,7 @@
 		6617399D8914BA4A3FC2D781 /* PlanEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEditView.swift; sourceTree = "<group>"; };
 		66AEA9010EA4FB91123187DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6A7B77DB2EF04EDB1DE934F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7C84BD756A47C8C1E76505E2 /* WorkoutDetailLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDetailLoader.swift; sourceTree = "<group>"; };
 		7ECEB196599C3A3BD8A1B8F9 /* Runtil.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runtil.entitlements; sourceTree = "<group>"; };
 		8B65D231A8BD09AA91716D35 /* PaceTargetEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaceTargetEditorView.swift; sourceTree = "<group>"; };
 		900379B492D9A4224C46D847 /* RuntilCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuntilCore; path = RuntilCore; sourceTree = SOURCE_ROOT; };
@@ -133,7 +137,7 @@
 		F0A4C32787AB066C2B16A9FE /* HeartRateMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitorView.swift; sourceTree = "<group>"; };
 		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
 		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
-		"TEMP_804E0449-BE41-493C-ACDB-D941C93952B7" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		"TEMP_11A0401F-1E37-46D0-87F8-3FE99ED6BFCF" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -214,6 +218,7 @@
 				21B2675EE573C64CF256503A /* PlanEditorView.swift */,
 				1F5FC479A4C7925D2B73205D /* PlanLibraryView.swift */,
 				3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */,
+				04BE87DAE855ED941B1A504F /* WorkoutDetailView.swift */,
 				FC0038C93211A5142A1C760E /* ZoneEditorView.swift */,
 			);
 			path = Views;
@@ -313,14 +318,15 @@
 				DAF12F2D03F21DF75E433DEA /* HeartRateMonitor.swift */,
 				B7BDF3BEF5348BA33D0F6BD6 /* PhoneMetricSource.swift */,
 				CF565E880E1FEA1A7313A386 /* PhoneWorkoutController.swift */,
+				7C84BD756A47C8C1E76505E2 /* WorkoutDetailLoader.swift */,
 			);
 			path = Workout;
 			sourceTree = "<group>";
 		};
-		"TEMP_F767A41E-20F0-4DD9-9207-19665D76F25D" /* haptics */ = {
+		"TEMP_691050EA-2457-4390-B623-4BBAED36FC12" /* haptics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_804E0449-BE41-493C-ACDB-D941C93952B7" /* Local.xcconfig */,
+				"TEMP_11A0401F-1E37-46D0-87F8-3FE99ED6BFCF" /* Local.xcconfig */,
 			);
 			path = haptics;
 			sourceTree = "<group>";
@@ -474,6 +480,8 @@
 				C97A7E878B456000259E4836 /* PlanLibraryView.swift in Sources */,
 				A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */,
 				8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */,
+				E7A43C277C464DB78470FB36 /* WorkoutDetailLoader.swift in Sources */,
+				1E00ED1818809DB003BF0891 /* WorkoutDetailView.swift in Sources */,
 				8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -558,7 +566,7 @@
 		};
 		3427D6FE32EC695648C53188 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_804E0449-BE41-493C-ACDB-D941C93952B7" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_11A0401F-1E37-46D0-87F8-3FE99ED6BFCF" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -612,7 +620,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -621,7 +629,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -677,7 +685,7 @@
 		};
 		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_804E0449-BE41-493C-ACDB-D941C93952B7" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_11A0401F-1E37-46D0-87F8-3FE99ED6BFCF" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -725,7 +733,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -733,7 +741,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};

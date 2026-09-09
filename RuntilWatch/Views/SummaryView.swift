@@ -7,6 +7,7 @@ struct SummaryView: View {
     let onDone: () -> Void
 
     @State private var appliedLag = false
+    @State private var appliedPace = false
 
     var body: some View {
         ScrollView {
@@ -33,6 +34,17 @@ struct SummaryView: View {
                     )
                 }
 
+                if let pace = controller.paceSuggestion, let plan = controller.plan {
+                    Divider()
+                    PaceCalibrationCard(
+                        plan: plan,
+                        suggestion: pace.suggestion,
+                        kind: pace.kind,
+                        applied: appliedPace,
+                        onApply: { applyPace(pace.suggestion, kind: pace.kind, to: plan) }
+                    )
+                }
+
                 Button("Done", action: onDone)
                     .padding(.top, 4)
             }
@@ -46,6 +58,52 @@ struct SummaryView: View {
         updated.hrResponse.lagSeconds = suggestion.rounded()
         store.update(updated)
         appliedLag = true
+    }
+
+    private func applyPace(
+        _ suggestion: PaceCalibration.Suggestion,
+        kind: SegmentKind,
+        to plan: WorkoutPlan
+    ) {
+        var updated = plan
+        updated.advisories.paceTarget?.bandsByKind[kind]?.toleranceSecondsPerMeter =
+            suggestion.suggestedTolerance
+        store.update(updated)
+        appliedPace = true
+    }
+}
+
+/// Offers to widen a pace band that turned out too tight, using what the run actually did.
+///
+/// The same idea as lag calibration: the number is decided afterwards, with evidence, not
+/// mid-stride from memory.
+private struct PaceCalibrationCard: View {
+    let plan: WorkoutPlan
+    let suggestion: PaceCalibration.Suggestion
+    let kind: SegmentKind
+    let applied: Bool
+    let onApply: () -> Void
+
+    private var unit: DistanceUnit { plan.units }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Label("Pace cues", systemImage: "speedometer")
+                .font(.caption.weight(.semibold))
+
+            Text("Fired \(suggestion.cueCount) times. You ran \(Format.duration(suggestion.observedRange.lowerBound * unit.metersPerUnit))–\(Format.duration(suggestion.observedRange.upperBound * unit.metersPerUnit)) /\(unit.abbreviation).")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+
+            if applied {
+                Label("Widened", systemImage: "checkmark.circle.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.green)
+            } else {
+                Button("Widen to ±\(Int(suggestion.suggestedTolerance * unit.metersPerUnit))s", action: onApply)
+                    .font(.system(size: 12))
+            }
+        }
     }
 }
 

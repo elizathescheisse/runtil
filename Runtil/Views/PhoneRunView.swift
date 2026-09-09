@@ -164,6 +164,20 @@ private struct ActiveRunView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+
+                if controller.plan?.advisories.paceTarget != nil {
+                    Button {
+                        controller.cues.paceCuesMuted.toggle()
+                    } label: {
+                        Label(
+                            controller.cues.paceCuesMuted ? "Pace off" : "Mute pace",
+                            systemImage: controller.cues.paceCuesMuted ? "speaker.slash.fill" : "speaker.wave.2"
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(controller.cues.paceCuesMuted ? .orange : .accentColor)
+                }
             }
 
             Button(role: .destructive) {

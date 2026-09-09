@@ -4,8 +4,8 @@ options:
   bundleIdPrefix: com.ergilp
   createIntermediateGroups: true
   deploymentTarget:
-    iOS: "17.0"
-    watchOS: "10.0"
+    iOS: "18.0"
+    watchOS: "11.0"
 
 # Signing lives in Local.xcconfig, which is gitignored — so a team ID never lands in the
 # public repo, and `make project` can't wipe it the way it wipes settings made in Xcode's UI.

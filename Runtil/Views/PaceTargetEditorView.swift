@@ -1,15 +1,16 @@
 import SwiftUI
 import RuntilCore
 
-/// Set the pace band for each kind of segment.
+/// Set a target pace and how much drift is acceptable.
 ///
-/// A band rather than a single number, because chasing an exact pace means being nagged
-/// constantly — you're never precisely on it. The cue fires only when you leave the range.
+/// One number and a tolerance, not two endpoints — "around 9:30" is how running is
+/// actually thought about, and it means the default can be genuinely useful rather than
+/// something you're forced to configure before the feature works.
 struct PaceTargetEditorView: View {
     @Binding var plan: WorkoutPlan
 
-    /// Only the kinds this plan actually contains, so a run/walk plan doesn't ask you to
-    /// set a cooldown pace you'll never use.
+    /// Only the kinds this plan contains, so a run/walk plan doesn't ask for a cooldown
+    /// pace it will never use.
     private var kinds: [SegmentKind] {
         var seen: [SegmentKind] = []
         for segment in plan.segments where !seen.contains(segment.kind) {
@@ -22,7 +23,7 @@ struct PaceTargetEditorView: View {
         Form {
             ForEach(kinds, id: \.self) { kind in
                 Section(kind.displayName) {
-                    PaceBandRows(plan: $plan, kind: kind)
+                    PaceRows(plan: $plan, kind: kind)
                 }
             }
 
@@ -45,7 +46,7 @@ struct PaceTargetEditorView: View {
             } header: {
                 Text("Sensitivity")
             } footer: {
-                Text("GPS pace jumps around, so it's averaged before being judged. The grace period stops you being told you're too slow during the seconds it takes to actually get moving after a walk break.")
+                Text("GPS pace jumps around, so it's averaged before being judged. The grace period stops you being told you're too slow during the seconds it takes to get moving after a walk break.")
             }
         }
         .navigationTitle("Target pace")
@@ -60,68 +61,81 @@ struct PaceTargetEditorView: View {
     }
 }
 
-/// Fastest and slowest ends of the band for one segment kind, entered as minutes and
-/// seconds per mile or kilometre — the units a runner actually thinks in.
-private struct PaceBandRows: View {
+private struct PaceRows: View {
     @Binding var plan: WorkoutPlan
     let kind: SegmentKind
 
     private var unit: DistanceUnit { plan.units }
+    private var band: PaceBand? { plan.advisories.paceTarget?.bandsByKind[kind] }
 
-    private var band: ClosedRange<Double>? {
-        plan.advisories.paceTarget?.bandsByKind[kind]
-    }
+    /// Named tolerances, so the choice is about terrain rather than arithmetic.
+    private static let choices: [(label: String, seconds: TimeInterval, note: String)] = [
+        ("Tight", 10, "Track or treadmill. GPS noise alone may trigger cues outdoors."),
+        ("Normal", 20, "Roads and mixed terrain."),
+        ("Loose", 40, "Hills and trails, where pace swings at steady effort.")
+    ]
 
     var body: some View {
         if let band {
-            // Lower seconds-per-metre is faster, so the band's lowerBound is the fast end.
-            paceStepper(
-                title: "Fastest",
-                seconds: band.lowerBound * unit.metersPerUnit,
-                onChange: { setBand(fastest: $0, slowest: band.upperBound * unit.metersPerUnit) }
-            )
-            paceStepper(
-                title: "Slowest",
-                seconds: band.upperBound * unit.metersPerUnit,
-                onChange: { setBand(fastest: band.lowerBound * unit.metersPerUnit, slowest: $0) }
-            )
-            Text("Buzzes if you drift outside \(Format.duration(band.lowerBound * unit.metersPerUnit))–\(Format.duration(band.upperBound * unit.metersPerUnit)) per \(unit.abbreviation).")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Stepper(
+                value: Binding(
+                    get: { band.target(in: unit) },
+                    set: { update(target: $0, tolerance: band.tolerance(in: unit)) }
+                ),
+                in: 180...2400,
+                step: 5
+            ) {
+                LabeledContent("Target") {
+                    Text("\(Format.duration(band.target(in: unit))) /\(unit.abbreviation)")
+                        .monospacedDigit()
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Tolerance")
+                    .font(.subheadline)
+                HStack(spacing: 8) {
+                    ForEach(Self.choices, id: \.label) { choice in
+                        Button(choice.label) {
+                            update(target: band.target(in: unit), tolerance: choice.seconds)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(abs(band.tolerance(in: unit) - choice.seconds) < 1 ? .accentColor : .secondary)
+                    }
+                }
+                Stepper(
+                    value: Binding(
+                        get: { band.tolerance(in: unit) },
+                        set: { update(target: band.target(in: unit), tolerance: $0) }
+                    ),
+                    in: 5...120,
+                    step: 5
+                ) {
+                    Text("±\(Int(band.tolerance(in: unit)))s")
+                        .monospacedDigit()
+                }
+                if let note = Self.choices.first(where: { abs(band.tolerance(in: unit) - $0.seconds) < 1 })?.note {
+                    Text(note)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                Text("Cues if you leave \(Format.duration(band.range.lowerBound * unit.metersPerUnit))–\(Format.duration(band.range.upperBound * unit.metersPerUnit)) /\(unit.abbreviation).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, 2)
         } else {
             Button("Set a target for \(kind.displayName.lowercased())") {
-                setBand(
-                    fastest: kind.isEffort ? 8 * 60 : 15 * 60,
-                    slowest: kind.isEffort ? 10 * 60 : 20 * 60
-                )
+                update(target: kind.isEffort ? 9 * 60 : 17 * 60, tolerance: nil)
             }
         }
     }
 
-    private func paceStepper(
-        title: String,
-        seconds: TimeInterval,
-        onChange: @escaping (TimeInterval) -> Void
-    ) -> some View {
-        Stepper(
-            value: Binding(get: { seconds }, set: onChange),
-            in: 180...2400,
-            step: 5
-        ) {
-            LabeledContent(title) {
-                Text("\(Format.duration(seconds)) /\(unit.abbreviation)")
-                    .monospacedDigit()
-            }
-        }
-    }
-
-    /// Keeps the two ends ordered, so dragging "fastest" past "slowest" swaps them rather
-    /// than producing a band nothing can satisfy.
-    private func setBand(fastest: TimeInterval, slowest: TimeInterval) {
-        plan.advisories.paceTarget?.bandsByKind[kind] = PaceTarget.band(
-            fastest: fastest,
-            slowest: slowest,
-            per: unit
+    private func update(target: TimeInterval, tolerance: TimeInterval?) {
+        plan.advisories.paceTarget?.bandsByKind[kind] = .perUnit(
+            target: target,
+            tolerance: tolerance,
+            unit: unit
         )
     }
 }

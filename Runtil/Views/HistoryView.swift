@@ -7,6 +7,9 @@ import RuntilCore
 /// The watch saves every session as a real `HKWorkout`, so this reads the same store the
 /// Fitness app does rather than keeping a private copy that could drift out of sync.
 struct HistoryView: View {
+    /// Zones come from the library so the detail charts shade *your* Zone 2, not a default.
+    let zones: HeartRateZones
+
     @State private var workouts: [HKWorkout] = []
     @State private var status: Status = .loading
 
@@ -41,7 +44,11 @@ struct HistoryView: View {
                     )
                 case .ready:
                     List(workouts, id: \.uuid) { workout in
-                        WorkoutRow(workout: workout)
+                        NavigationLink {
+                            WorkoutDetailView(workout: workout, zones: zones)
+                        } label: {
+                            WorkoutRow(workout: workout)
+                        }
                     }
                 }
             }
@@ -57,7 +64,17 @@ struct HistoryView: View {
             return
         }
         do {
-            try await store.requestAuthorization(toShare: [], read: [HKObjectType.workoutType()])
+            try await store.requestAuthorization(
+                toShare: [HKQuantityType(.workoutEffortScore)],
+                read: [
+                    HKObjectType.workoutType(),
+                    HKQuantityType(.heartRate),
+                    HKQuantityType(.distanceWalkingRunning),
+                    HKQuantityType(.activeEnergyBurned),
+                    HKQuantityType(.workoutEffortScore),
+                    HKSeriesType.workoutRoute()
+                ]
+            )
             workouts = try await fetchRuns()
             status = .ready
         } catch {

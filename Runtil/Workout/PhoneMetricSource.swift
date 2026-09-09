@@ -23,6 +23,10 @@ final class PhoneMetricSource: NSObject {
     private var lastLocation: CLLocation?
     private var latestPace: Double?
 
+    private var altitudes: [Double] = []
+    private var weather: WeatherSnapshot?
+    private var hasRequestedWeather = false
+
     private var continuation: AsyncStream<Tick>.Continuation?
     private var tickTask: Task<Void, Never>?
 
@@ -59,7 +63,11 @@ final class PhoneMetricSource: NSObject {
 
         if savesToHealth, HKHealthStore.isHealthDataAvailable() {
             try? await store.requestAuthorization(
-                toShare: [HKQuantityType.workoutType(), HKSeriesType.workoutRoute()],
+                toShare: [
+                    HKQuantityType.workoutType(),
+                    HKSeriesType.workoutRoute(),
+                    HKQuantityType(.workoutEffortScore)
+                ],
                 read: [HKQuantityType(.heartRate), HKQuantityType(.distanceWalkingRunning)]
             )
             await beginWorkout()
@@ -111,8 +119,44 @@ final class PhoneMetricSource: NSObject {
         continuation?.finish()
     }
 
+    /// Conditions explain a lot about a run, so they're recorded once at the start.
+    private func fetchWeatherIfNeeded(at location: CLLocation) {
+        guard !hasRequestedWeather else { return }
+        hasRequestedWeather = true
+        Task { [weak self] in
+            self?.weather = try? await WeatherLookup.current(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        }
+    }
+
+    private var workoutMetadata: [String: Any] {
+        var metadata: [String: Any] = [:]
+        // A larger threshold than the watch uses: phone GPS altitude has no barometer
+        // behind it and wanders further.
+        let gain = RunAnalysis.elevationGain(altitudes: altitudes, threshold: 4.0)
+        if gain > 0 {
+            metadata[HKMetadataKeyElevationAscended] = HKQuantity(unit: .meter(), doubleValue: gain)
+        }
+        if let weather {
+            metadata[HKMetadataKeyWeatherTemperature] = HKQuantity(
+                unit: .degreeCelsius(), doubleValue: weather.temperatureCelsius
+            )
+            metadata[HKMetadataKeyWeatherHumidity] = HKQuantity(
+                unit: .percent(), doubleValue: weather.relativeHumidity
+            )
+        }
+        return metadata
+    }
+
     func finish() async {
         guard let builder else { return }
+
+        let metadata = workoutMetadata
+        if !metadata.isEmpty {
+            try? await builder.addMetadata(metadata)
+        }
         try? await builder.endCollection(at: Date())
         if savesToHealth {
             _ = try? await builder.finishWorkout()
@@ -132,6 +176,14 @@ extension PhoneMetricSource: CLLocationManagerDelegate {
         if savesToHealth {
             routeBuilder?.insertRouteData(usable) { _, _ in }
         }
+
+        if let first = usable.first {
+            fetchWeatherIfNeeded(at: first)
+        }
+        // Vertical accuracy is a separate and much worse figure than horizontal.
+        altitudes += usable
+            .filter { $0.verticalAccuracy > 0 && $0.verticalAccuracy <= 25 }
+            .map(\.altitude)
 
         for location in usable {
             defer { lastLocation = location }

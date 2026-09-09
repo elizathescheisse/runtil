@@ -30,6 +30,14 @@ final class HapticPlayer {
     /// Set false to run silently (previews, or a user who wants the screen only).
     var hapticsEnabled = true
 
+    /// Silences pace nudges for the rest of the run, without touching segment changes.
+    ///
+    /// The mid-run escape hatch for a band that turns out too tight. Deliberately a mute
+    /// and not an editor: at mile three you know the cues are wrong but not what number
+    /// would be right, and that decision is better made afterwards from the summary.
+    /// Muted cues are still logged, so the summary can still say how often it fired.
+    var paceCuesMuted = false
+
     private var currentTask: Task<Void, Never>?
     private var currentPriority: Int = .min
     private var lastFinished: Date = .distantPast
@@ -39,6 +47,11 @@ final class HapticPlayer {
 
     func play(_ cue: Cue, elapsed: TimeInterval) {
         let pattern = HapticPattern.pattern(for: cue)
+
+        if paceCuesMuted, cue.isPaceCue {
+            record(cue, pattern: pattern, elapsed: elapsed, played: false)
+            return
+        }
 
         // Something higher-priority is mid-phrase: drop this one entirely.
         if currentTask != nil, cue.priority <= currentPriority {

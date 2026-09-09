@@ -12,7 +12,7 @@ struct RuntilApp: App {
                     .tabItem { Label("Run", systemImage: "figure.run") }
                 PlanLibraryView(library: library)
                     .tabItem { Label("Plans", systemImage: "list.bullet") }
-                HistoryView()
+                HistoryView(zones: library.plans.first?.zones ?? .estimated(age: 35))
                     .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
             }
         }

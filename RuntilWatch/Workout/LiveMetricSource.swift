@@ -41,6 +41,12 @@ final class LiveMetricSource: NSObject, MetricSource {
     private var startDate: Date?
     private var latestHeartRate: Int?
     private var latestDistance: Double = 0
+
+    /// Kept so elevation gain can be computed at the end. Apple Watch has a barometric
+    /// altimeter, so these are better than phone-only GPS altitude.
+    private var altitudes: [Double] = []
+    private var weather: WeatherSnapshot?
+    private var hasRequestedWeather = false
     /// Pace from GPS speed rather than HealthKit distance: HealthKit delivers distance in
     /// laggy chunks, which is fine for splits but far too coarse to cue pace on.
     private var latestPace: Double?
@@ -165,8 +171,46 @@ final class LiveMetricSource: NSObject, MetricSource {
         continuation?.finish()
     }
 
+    /// Conditions explain a lot about a run — heart rate for a given pace climbs sharply
+    /// in heat and humidity — so they're recorded once, at the start, rather than averaged.
+    private func fetchWeatherIfNeeded(at location: CLLocation) {
+        guard !hasRequestedWeather else { return }
+        hasRequestedWeather = true
+        Task { [weak self] in
+            self?.weather = try? await WeatherLookup.current(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+        }
+    }
+
+    /// Everything worth attaching to the finished workout that HealthKit won't derive.
+    private var workoutMetadata: [String: Any] {
+        var metadata: [String: Any] = [:]
+
+        let gain = RunAnalysis.elevationGain(altitudes: altitudes)
+        if gain > 0 {
+            metadata[HKMetadataKeyElevationAscended] = HKQuantity(unit: .meter(), doubleValue: gain)
+        }
+        if let weather {
+            metadata[HKMetadataKeyWeatherTemperature] = HKQuantity(
+                unit: .degreeCelsius(), doubleValue: weather.temperatureCelsius
+            )
+            // HealthKit expects a fraction here, not whole percent.
+            metadata[HKMetadataKeyWeatherHumidity] = HKQuantity(
+                unit: .percent(), doubleValue: weather.relativeHumidity
+            )
+        }
+        return metadata
+    }
+
     func finish() async {
         guard let builder else { return }
+
+        let metadata = workoutMetadata
+        if !metadata.isEmpty {
+            try? await builder.addMetadata(metadata)
+        }
         try? await builder.endCollection(at: Date())
         if savesToHealth {
             _ = try? await builder.finishWorkout()
@@ -250,6 +294,15 @@ extension LiveMetricSource: CLLocationManagerDelegate {
         if !routable.isEmpty, savesToHealth {
             routeBuilder?.insertRouteData(routable) { _, _ in }
         }
+
+        if let first = routable.first {
+            fetchWeatherIfNeeded(at: first)
+        }
+        // Vertical accuracy is a separate, much worse figure than horizontal, so it's
+        // checked on its own — a fix good enough for the map may be useless for altitude.
+        altitudes += routable
+            .filter { $0.verticalAccuracy > 0 && $0.verticalAccuracy <= 15 }
+            .map(\.altitude)
 
         guard let location = locations.last else { return }
         // Pace is stricter: a negative speed means no valid fix, and below ~0.5 m/s the

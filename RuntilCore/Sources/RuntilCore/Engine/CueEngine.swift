@@ -16,6 +16,19 @@ public final class CueEngine {
     public private(set) var segmentStartDistance: Double = 0
     public private(set) var lagObservations: [LagObservation] = []
 
+    /// Rolling pace recorded during segments a pace band applied to, so the summary can
+    /// tell you what you actually ran rather than asking you to remember.
+    public private(set) var paceObservations: [SegmentKind: [Double]] = [:]
+    /// How often each kind's band was breached, muted or not.
+    public private(set) var paceCueCounts: [SegmentKind: Int] = [:]
+
+    /// Altitudes, for elevation gain. Fed in by the caller since GPS lives outside here.
+    public private(set) var altitudes: [Double] = []
+
+    public func recordAltitude(_ metres: Double) {
+        altitudes.append(metres)
+    }
+
     /// Heart rate projected forward by your response lag. This is the number the engine
     /// actually makes decisions on — surfaced so the UI can show it alongside the raw BPM.
     public private(set) var projectedHeartRate: Int?
@@ -295,17 +308,25 @@ public final class CueEngine {
         guard let target = plan.advisories.paceTarget,
               let band = target.bandsByKind[segment.kind],
               let pace = rollingPace,
-              inSegment >= target.graceAfterSegmentStart,
-              passesCooldown(.pace, at: tick.elapsed)
+              inSegment >= target.graceAfterSegmentStart
         else { return [] }
 
-        // Lower seconds-per-meter means faster.
-        if pace < band.lowerBound {
+        // Recorded whether or not a cue fires, and regardless of cooldown — the summary
+        // needs the pace actually held, not just the moments it was out of range.
+        paceObservations[segment.kind, default: []].append(pace)
+
+        guard passesCooldown(.pace, at: tick.elapsed) else { return [] }
+
+        // Lower seconds-per-metre means faster.
+        let range = band.range
+        if pace < range.lowerBound {
             mark(.pace, at: tick.elapsed)
+            paceCueCounts[segment.kind, default: 0] += 1
             return [.paceTooFast(secondsPerMeter: pace)]
         }
-        if pace > band.upperBound {
+        if pace > range.upperBound {
             mark(.pace, at: tick.elapsed)
+            paceCueCounts[segment.kind, default: 0] += 1
             return [.paceTooSlow(secondsPerMeter: pace)]
         }
         return []

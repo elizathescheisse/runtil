@@ -1,9 +1,9 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
     name: "RuntilCore",
-    platforms: [.iOS(.v17), .watchOS(.v10), .macOS(.v14)],
+    platforms: [.iOS(.v18), .watchOS(.v11), .macOS(.v15)],
     products: [
         .library(name: "RuntilCore", targets: ["RuntilCore"])
     ],
