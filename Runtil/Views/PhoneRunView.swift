@@ -117,59 +117,7 @@ private struct PlanPickerView: View {
                 Text("Tap a plan to start tracking. Editing plans happens in the Plans tab.\n\nTime, distance and pace work on their own. Heart-rate plans need a live reading — either a paired Bluetooth monitor, or start the plan from the runtil watch app, which has the sensor on your wrist.")
             }
 
-            Section {
-                LabeledContent {
-                    Text(mirror.availability.statusText)
-                        .foregroundStyle(mirror.availability == .ready ? .green : .secondary)
-                } label: {
-                    Label("Apple Watch", systemImage: "applewatch")
-                }
-                if let explanation = mirror.availability.explanation {
-                    Text(explanation)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else if let guidance = mirror.availability.guidance {
-                    Text(guidance)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                NavigationLink {
-                    HeartRateMonitorView(monitor: controller.monitor)
-                } label: {
-                    LabeledContent {
-                        Text(controller.monitor.state.description)
-                            .foregroundStyle(controller.monitor.state.isConnected ? .green : .secondary)
-                    } label: {
-                        Label("Bluetooth monitor", systemImage: "sensor.tag.radiowaves.forward")
-                    }
-                }
-
-                // Plans are pushed automatically on every edit, but a push can miss its
-                // moment if the session wasn't ready — so there's a way to ask again
-                // rather than the two devices quietly disagreeing.
-                Button {
-                    library.syncNow()
-                } label: {
-                    LabeledContent {
-                        if let pushed = library.lastPushedAt {
-                            Text(pushed.formatted(date: .omitted, time: .shortened))
-                                .foregroundStyle(.secondary)
-                        }
-                    } label: {
-                        Label("Send plans to watch", systemImage: "arrow.triangle.2.circlepath")
-                    }
-                }
-                if let problem = library.lastSyncProblem {
-                    Text(problem)
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-            } header: {
-                Text("Heart rate source")
-            } footer: {
-                Text("Either one unlocks heart-rate plans — you don't need both.\n\n**Apple Watch:** start the plan on your watch. It runs the session, buzzes your wrist, and appears here live.\n\n**Bluetooth monitor:** a chest strap or armband paired to your phone. Start the plan here, and cues come through your headphones.")
-            }
+            HeartRateSourceSection(library: library, controller: controller, mirror: mirror)
 
             Section {
                 Toggle("Spoken cues", isOn: Binding(
@@ -189,6 +137,114 @@ private struct PlanPickerView: View {
             } footer: {
                 Text("Audio keeps working with the screen off and your phone in a pocket. Vibration is reliable while the app is open, but iOS may stop it once the screen locks — so keep audio on if you can't watch the screen.")
             }
+        }
+    }
+}
+
+/// Where the heart rate is coming from — folded away once it's coming from somewhere.
+///
+/// This is setup, not status: it earns the whole screen while you're still working out
+/// which of the two routes you have, and almost none of it afterwards. So it collapses to
+/// a single line naming the source once one is connected, and opens itself back up if that
+/// source goes away — which is exactly when the guidance is worth reading again.
+private struct HeartRateSourceSection: View {
+    @Bindable var library: PlanLibrary
+    @Bindable var controller: PhoneWorkoutController
+    @Bindable var mirror: MirroredWorkoutObserver
+
+    /// nil until you open or close it yourself, after which your choice stands — but only
+    /// until the connection actually changes, since that's a new situation to judge.
+    @State private var manuallyExpanded: Bool?
+
+    /// Everything currently able to supply a reading. Both can be true, and saying so
+    /// beats picking one and leaving you wondering where the other went.
+    private var connectedSources: [String] {
+        var sources: [String] = []
+        if mirror.availability == .ready { sources.append("Apple Watch") }
+        if case .connected(let name) = controller.monitor.state { sources.append(name) }
+        return sources
+    }
+
+    private var isExpanded: Bool { manuallyExpanded ?? connectedSources.isEmpty }
+
+    var body: some View {
+        Section {
+            DisclosureGroup(
+                isExpanded: Binding(get: { isExpanded }, set: { manuallyExpanded = $0 })
+            ) {
+                details
+            } label: {
+                LabeledContent {
+                    if connectedSources.isEmpty {
+                        Text("None").foregroundStyle(.orange)
+                    } else {
+                        Text(connectedSources.joined(separator: " · "))
+                            .foregroundStyle(.green)
+                    }
+                } label: {
+                    Label("Heart rate source", systemImage: "heart.text.square")
+                }
+            }
+            // A source appearing or vanishing overrides an earlier manual choice: the
+            // reason you opened it was to fix something, and it's now fixed.
+            .onChange(of: connectedSources.isEmpty) { manuallyExpanded = nil }
+        } footer: {
+            // Only while open. Two paragraphs explaining a choice you've already made is
+            // the bulk of what this section was costing the screen.
+            if isExpanded {
+                Text("Either one unlocks heart-rate plans — you don't need both.\n\n**Apple Watch:** start the plan on your watch. It runs the session, buzzes your wrist, and appears here live.\n\n**Bluetooth monitor:** a chest strap or armband paired to your phone. Start the plan here, and cues come through your headphones.")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var details: some View {
+        LabeledContent {
+            Text(mirror.availability.statusText)
+                .foregroundStyle(mirror.availability == .ready ? .green : .secondary)
+        } label: {
+            Label("Apple Watch", systemImage: "applewatch")
+        }
+        if let explanation = mirror.availability.explanation {
+            Text(explanation)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else if let guidance = mirror.availability.guidance {
+            Text(guidance)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+
+        NavigationLink {
+            HeartRateMonitorView(monitor: controller.monitor)
+        } label: {
+            LabeledContent {
+                Text(controller.monitor.state.description)
+                    .foregroundStyle(controller.monitor.state.isConnected ? .green : .secondary)
+            } label: {
+                Label("Bluetooth monitor", systemImage: "sensor.tag.radiowaves.forward")
+            }
+        }
+
+        // Plans are pushed automatically on every edit, but a push can miss its
+        // moment if the session wasn't ready — so there's a way to ask again
+        // rather than the two devices quietly disagreeing.
+        Button {
+            library.syncNow()
+        } label: {
+            LabeledContent {
+                if let pushed = library.lastPushedAt {
+                    Text(pushed.formatted(date: .omitted, time: .shortened))
+                        .foregroundStyle(.secondary)
+                }
+            } label: {
+                Label("Send plans to watch", systemImage: "arrow.triangle.2.circlepath")
+            }
+        }
+        if let problem = library.lastSyncProblem {
+            Text(problem)
+                .font(.caption)
+                .foregroundStyle(.orange)
         }
     }
 }
