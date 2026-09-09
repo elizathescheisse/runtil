@@ -54,9 +54,14 @@ struct HistoryView: View {
                             } label: {
                                 WorkoutRow(workout: workout)
                             }
+                            // Only offered where it can actually work. HealthKit permits
+                            // deleting solely what this app saved, so showing Delete on
+                            // someone else's run promises something it cannot do.
                             .swipeActions(edge: .trailing) {
-                                Button("Delete", role: .destructive) {
-                                    pendingDeletion = workout
+                                if workout.isFromRuntil {
+                                    Button("Delete", role: .destructive) {
+                                        pendingDeletion = workout
+                                    }
                                 }
                             }
                         }
@@ -173,8 +178,17 @@ private struct WorkoutRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(workout.startDate.formatted(date: .abbreviated, time: .shortened))
-                .font(.headline)
+            HStack(spacing: 6) {
+                Text(workout.startDate.formatted(date: .abbreviated, time: .shortened))
+                    .font(.headline)
+                // Says at a glance which runs this app recorded — and by implication
+                // which ones it can delete.
+                if workout.isFromRuntil {
+                    Image(systemName: "waveform.path.ecg")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                }
+            }
             HStack(spacing: 12) {
                 Label(Format.duration(workout.duration), systemImage: "clock")
                 if let meters = distanceMeters {
@@ -183,6 +197,12 @@ private struct WorkoutRow: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+
+            if !workout.isFromRuntil {
+                Text("Recorded by \(workout.sourceRevision.source.name)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding(.vertical, 2)
     }
@@ -191,5 +211,18 @@ private struct WorkoutRow: View {
         workout.statistics(for: HKQuantityType(.distanceWalkingRunning))?
             .sumQuantity()?
             .doubleValue(for: .meter())
+    }
+}
+
+
+extension HKWorkout {
+    /// Whether runtil saved this run, and so may delete it.
+    ///
+    /// Matches on prefix because the watch app and the phone app have different bundle
+    /// identifiers — a run recorded on the wrist is saved by `…runtil.watchkitapp`, which
+    /// an equality check would disown.
+    var isFromRuntil: Bool {
+        guard let ours = Bundle.main.bundleIdentifier else { return false }
+        return sourceRevision.source.bundleIdentifier.hasPrefix(ours)
     }
 }
