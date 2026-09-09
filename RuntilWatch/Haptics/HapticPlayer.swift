@@ -53,8 +53,12 @@ final class HapticPlayer {
             return
         }
 
+        // A repeated segment cue is the point, not noise — it fires seconds apart and
+        // must never be mistaken for a collision and dropped.
+        let isSegmentCue: Bool = { if case .beginSegment = cue { return true }; return false }()
+
         // Something higher-priority is mid-phrase: drop this one entirely.
-        if currentTask != nil, cue.priority <= currentPriority {
+        if currentTask != nil, !isSegmentCue, cue.priority <= currentPriority {
             record(cue, pattern: pattern, elapsed: elapsed, played: false)
             return
         }

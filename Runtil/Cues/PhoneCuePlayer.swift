@@ -106,10 +106,14 @@ final class PhoneCuePlayer {
         let beats: [(intensity: Float, sharpness: Float, offset: TimeInterval)]
 
         switch cue {
+        // Longer and unmistakably rhythmic, matching the watch. A notification is one
+        // buzz; this is five, rising or falling.
         case .beginSegment(let kind, _, _) where kind.isEffort:
-            beats = [(1.0, 0.5, 0), (1.0, 0.8, 0.18), (1.0, 1.0, 0.34)]
+            beats = [(1.0, 0.4, 0), (1.0, 0.6, 0.30), (1.0, 0.8, 0.48),
+                     (1.0, 1.0, 0.66), (1.0, 1.0, 0.96)]
         case .beginSegment:
-            beats = [(1.0, 1.0, 0), (1.0, 0.7, 0.18), (0.9, 0.4, 0.34)]
+            beats = [(1.0, 1.0, 0), (1.0, 0.8, 0.30), (1.0, 0.6, 0.48),
+                     (1.0, 0.4, 0.66), (0.9, 0.3, 0.96)]
         case .approachingZoneCeiling:
             beats = [(1.0, 0.9, 0), (1.0, 0.9, 0.3)]
         case .approachingZoneFloor:

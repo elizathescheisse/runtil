@@ -213,6 +213,107 @@ final class HeartRateDrivenTests: XCTestCase {
     }
 }
 
+final class EffortConfirmationTests: XCTestCase {
+
+    /// A plan that repeats its segment cue until pace confirms the change.
+    private func plan(repeatAfter: TimeInterval = 10, maxRepeats: Int = 3) -> WorkoutPlan {
+        var plan = WorkoutPlan.timedIntervals(run: 120, walk: 120, repeatCount: 2, zones: testZones)
+        plan.advisories.effortConfirmation = EffortConfirmation(
+            repeatAfter: repeatAfter,
+            maxRepeats: maxRepeats
+        )
+        return plan
+    }
+
+    private func startCues(_ recorder: Recorder, kind: SegmentKind) -> [TimeInterval] {
+        recorder.times { cue in
+            if case .beginSegment(let k, _, _) = cue { return k == kind }
+            return false
+        }
+    }
+
+    /// A repeat is a `beginSegment` carrying an index and cycle already seen — that's what
+    /// distinguishes "the walk segment started" from "you still haven't started walking",
+    /// and it's robust to however the timeline happens to fall.
+    private func repeatCount(_ recorder: Recorder) -> Int {
+        var seen = Set<String>()
+        var repeats = 0
+        for entry in recorder.cues {
+            guard case .beginSegment(let kind, let index, let cycle) = entry.cue else { continue }
+            let key = "\(kind)-\(index)-\(cycle)"
+            if seen.contains(key) { repeats += 1 } else { seen.insert(key) }
+        }
+        return repeats
+    }
+
+    func testNoRepeatWhenYouActuallyComply() {
+        // Runs when told to run, walks when told to walk.
+        let engine = CueEngine(plan: plan())
+        let recorder = simulate(engine: engine, seconds: 300) { _, _ in 130 }
+
+        XCTAssertEqual(repeatCount(recorder), 0, "complying should never be nagged")
+        XCTAssertFalse(startCues(recorder, kind: .run).isEmpty)
+    }
+
+    func testRepeatsWhenYouKeepRunningThroughAWalkCue() {
+        // Ignores the walk cue and keeps running at 3 m/s throughout.
+        let engine = CueEngine(plan: plan())
+        let recorder = simulate(
+            engine: engine,
+            seconds: 300,
+            metersPerSecond: { _, _ in 3.0 }
+        ) { _, _ in 130 }
+
+        XCTAssertGreaterThan(repeatCount(recorder), 0, "should nag when the walk never happens")
+    }
+
+    func testRepeatsAreBounded() {
+        // Never complies at all. The nagging has to stop regardless.
+        let engine = CueEngine(plan: plan(repeatAfter: 5, maxRepeats: 2))
+        let recorder = simulate(
+            engine: engine,
+            seconds: 240,
+            metersPerSecond: { _, _ in 3.0 }
+        ) { _, _ in 130 }
+
+        // Each segment may nag at most twice, so a run this length can't exceed a handful.
+        XCTAssertLessThanOrEqual(repeatCount(recorder), 6, "nagging must be bounded")
+        XCTAssertGreaterThan(repeatCount(recorder), 0)
+    }
+
+    func testSilentWithoutPaceData() {
+        // Indoors, no GPS. Repeating a cue nobody can satisfy is worse than missing one.
+        let engine = CueEngine(plan: plan())
+        var recorder = Recorder()
+        for second in 0...300 {
+            let tick = Tick(elapsed: TimeInterval(second), totalDistance: 0,
+                            heartRate: 130, instantPace: nil)
+            for cue in engine.advance(tick) { recorder.cues.append((TimeInterval(second), cue)) }
+        }
+        XCTAssertEqual(repeatCount(recorder), 0, "no pace means no nagging")
+    }
+
+    func testComplianceIsJudgedFromSegmentStartNotARollingWindow() {
+        // The bug this guards: a 25s rolling window straddles the transition, so ten
+        // seconds into a walk it is still mostly running — and would nag someone who is
+        // walking perfectly well.
+        let engine = CueEngine(plan: plan(repeatAfter: 10))
+        let recorder = simulate(engine: engine, seconds: 200) { _, _ in 130 }
+        XCTAssertEqual(repeatCount(recorder), 0)
+    }
+
+    func testThresholdClassifiesPaces() {
+        let confirmation = EffortConfirmation()
+        // 3 m/s is running; 1.4 m/s is walking.
+        XCTAssertEqual(confirmation.matchesEffort(.run, pace: 1.0 / 3.0), true)
+        XCTAssertEqual(confirmation.matchesEffort(.walk, pace: 1.0 / 3.0), false)
+        XCTAssertEqual(confirmation.matchesEffort(.walk, pace: 1.0 / 1.4), true)
+        XCTAssertEqual(confirmation.matchesEffort(.run, pace: 1.0 / 1.4), false)
+        XCTAssertNil(confirmation.matchesEffort(.run, pace: nil))
+        XCTAssertNil(confirmation.matchesEffort(.run, pace: 0))
+    }
+}
+
 final class AdvisoryTests: XCTestCase {
 
     func testDistanceSplitsFireEveryHalfMile() {

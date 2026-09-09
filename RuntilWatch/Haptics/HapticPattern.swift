@@ -37,21 +37,27 @@ extension HapticPattern {
     static func pattern(for cue: Cue) -> HapticPattern {
         switch cue {
 
-        // Rising, with a leading .start — "go".
+        // The two cues that matter most, and the two most easily mistaken for an incoming
+        // notification. So they open with a strong `.notification` tap to grab attention,
+        // then run a deliberate rhythm nothing else in the vocabulary uses: four beats,
+        // clearly rising or clearly falling. A message arriving is one buzz; this is not.
         case .beginSegment(let kind, _, _) where kind.isEffort:
             return HapticPattern([
-                Beat(type: .start, gap: 0.25),
-                Beat(type: .directionUp, gap: 0.15),
-                Beat(type: .directionUp, gap: 0)
-            ], describedAs: "start · up · up")
+                Beat(type: .notification, gap: 0.30),
+                Beat(type: .directionUp, gap: 0.18),
+                Beat(type: .directionUp, gap: 0.18),
+                Beat(type: .directionUp, gap: 0.30),
+                Beat(type: .start, gap: 0)
+            ], describedAs: "notification · up ×3 · start")
 
-        // Falling, with a leading .stop — "ease off".
         case .beginSegment:
             return HapticPattern([
-                Beat(type: .stop, gap: 0.25),
-                Beat(type: .directionDown, gap: 0.15),
-                Beat(type: .directionDown, gap: 0)
-            ], describedAs: "stop · down · down")
+                Beat(type: .notification, gap: 0.30),
+                Beat(type: .directionDown, gap: 0.18),
+                Beat(type: .directionDown, gap: 0.18),
+                Beat(type: .directionDown, gap: 0.30),
+                Beat(type: .stop, gap: 0)
+            ], describedAs: "notification · down ×3 · stop")
 
         // Two firm taps. Deliberately the most attention-grabbing phrase in the set.
         case .approachingZoneCeiling:

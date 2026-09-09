@@ -11,20 +11,83 @@ public struct Advisories: Codable, Hashable, Sendable {
     public var distanceSplits: DistanceSplits?
     /// Bare BPM lines you want flagged whenever crossed, in either direction.
     public var thresholdCrossings: [Int]
+    /// Repeats a segment cue until your pace shows you changed effort. On by default —
+    /// a cue you might have mistaken for a text message isn't doing its job.
+    public var effortConfirmation: EffortConfirmation?
 
     public init(
         heartRateGuard: HeartRateGuard? = nil,
         paceTarget: PaceTarget? = nil,
         distanceSplits: DistanceSplits? = nil,
-        thresholdCrossings: [Int] = []
+        thresholdCrossings: [Int] = [],
+        effortConfirmation: EffortConfirmation? = EffortConfirmation()
     ) {
         self.heartRateGuard = heartRateGuard
         self.paceTarget = paceTarget
         self.distanceSplits = distanceSplits
         self.thresholdCrossings = thresholdCrossings
+        self.effortConfirmation = effortConfirmation
+    }
+
+    /// Tolerant of libraries written before effort confirmation existed, defaulting it on.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        heartRateGuard = try container.decodeIfPresent(HeartRateGuard.self, forKey: .heartRateGuard)
+        paceTarget = try container.decodeIfPresent(PaceTarget.self, forKey: .paceTarget)
+        distanceSplits = try container.decodeIfPresent(DistanceSplits.self, forKey: .distanceSplits)
+        thresholdCrossings = try container.decodeIfPresent([Int].self, forKey: .thresholdCrossings) ?? []
+        effortConfirmation = try container.decodeIfPresent(
+            EffortConfirmation.self, forKey: .effortConfirmation
+        ) ?? EffortConfirmation()
     }
 
     public static let none = Advisories()
+}
+
+/// Repeats a segment cue until your pace shows you actually changed effort.
+///
+/// A single buzz is indistinguishable from any other notification, so "start running" can
+/// be missed entirely or mistaken for a text message. Repeating until the pace confirms
+/// the change makes the cue unambiguous: if it's still nagging, it meant you.
+public struct EffortConfirmation: Codable, Hashable, Sendable {
+    /// Seconds after a segment starts before the first repeat. Long enough to actually
+    /// change gear, and to let a rolling GPS pace catch up with you.
+    public var repeatAfter: TimeInterval
+    /// How many times to repeat before giving up. Bounded because a wrong threshold, a
+    /// treadmill, or a lost GPS fix must not turn into buzzing for the whole segment.
+    public var maxRepeats: Int
+    /// Seconds per metre dividing running from walking. Default ≈ 14:30/mile, which sits
+    /// between a brisk walk and a slow jog.
+    public var runWalkThresholdSecondsPerMeter: Double
+
+    public init(
+        repeatAfter: TimeInterval = 10,
+        maxRepeats: Int = 3,
+        runWalkThresholdSecondsPerMeter: Double = 0.54
+    ) {
+        self.repeatAfter = repeatAfter
+        self.maxRepeats = maxRepeats
+        self.runWalkThresholdSecondsPerMeter = runWalkThresholdSecondsPerMeter
+    }
+
+    /// Whether the pace being held matches what the segment asked for.
+    ///
+    /// Returns nil when there's no usable pace — indoors, or before GPS settles. Unknown
+    /// has to mean "don't nag", since repeating a cue nobody can satisfy is worse than
+    /// missing one.
+    public func matchesEffort(_ kind: SegmentKind, pace: Double?) -> Bool? {
+        guard let pace, pace.isFinite, pace > 0 else { return nil }
+        let isRunningPace = pace < runWalkThresholdSecondsPerMeter
+        return kind.isEffort ? isRunningPace : !isRunningPace
+    }
+
+    public func threshold(in unit: DistanceUnit) -> TimeInterval {
+        runWalkThresholdSecondsPerMeter * unit.metersPerUnit
+    }
+
+    public static func threshold(perUnit seconds: TimeInterval, unit: DistanceUnit) -> Double {
+        seconds / unit.metersPerUnit
+    }
 }
 
 /// Warns you as you approach the edges of a target zone.

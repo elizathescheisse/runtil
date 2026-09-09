@@ -48,6 +48,9 @@ public final class CueEngine {
     private var previousHeartRate: Int?
     private var emittedCountdowns: Set<Int> = []
     private var started = false
+    private var effortRepeats = 0
+    private var lastEffortRepeatAt: TimeInterval = 0
+    private var effortConfirmed = false
 
     /// A transition we're still waiting on a heart-rate response for, used to calibrate lag.
     private var pendingLagProbe: (at: TimeInterval, from: SegmentKind, to: SegmentKind)?
@@ -68,6 +71,19 @@ public final class CueEngine {
     }
 
     private var response: HRResponseProfile { plan.hrResponse }
+
+    /// Average pace since the current segment began.
+    ///
+    /// The ordinary rolling pace spans a fixed window that straddles the transition, so ten
+    /// seconds into a walk it is still mostly made of running — judging compliance on that
+    /// would nag you for not walking while you are, in fact, walking.
+    ///
+    /// Returns nil until there are enough samples to mean anything.
+    private var paceSinceSegmentStart: Double? {
+        let samples = paceHistory.filter { $0.elapsed >= segmentStartElapsed }
+        guard samples.count >= 5 else { return nil }
+        return samples.map(\.pace).reduce(0, +) / Double(samples.count)
+    }
 
     /// Physiologically plausible ceiling on HR slope. Guards against a sensor glitch
     /// projecting an absurd heart rate and triggering a spurious transition.
@@ -132,8 +148,11 @@ public final class CueEngine {
         if let pace = tick.instantPace, pace.isFinite, pace > 0 {
             paceHistory.append((tick.elapsed, pace))
         }
+        // Kept long enough to serve both consumers: the pace-target window, and
+        // compliance measured from the start of the current segment.
         let paceWindow = plan.advisories.paceTarget?.window ?? 25
-        paceHistory.removeAll { $0.elapsed < tick.elapsed - paceWindow }
+        let cutoff = min(tick.elapsed - paceWindow, segmentStartElapsed)
+        paceHistory.removeAll { $0.elapsed < cutoff }
         rollingPace = paceHistory.isEmpty
             ? nil
             : paceHistory.map(\.pace).reduce(0, +) / Double(paceHistory.count)
@@ -214,6 +233,9 @@ public final class CueEngine {
         segmentStartDistance = tick.totalDistance
         ceilingStreak = 0
         floorStreak = 0
+        effortRepeats = 0
+        lastEffortRepeatAt = tick.elapsed
+        effortConfirmed = false
         emittedCountdowns.removeAll()
         if plan.advisories.distanceSplits?.scope == .perSegment { lastSplitIndex = 0 }
 
@@ -237,12 +259,48 @@ public final class CueEngine {
         var cues: [Cue] = []
         let inSegment = tick.elapsed - segmentStartElapsed
 
+        cues.append(contentsOf: effortConfirmationCues(segment, tick: tick, inSegment: inSegment))
         cues.append(contentsOf: countdownCues(segment, inSegment: inSegment))
         cues.append(contentsOf: heartRateCues(segment, tick: tick))
         cues.append(contentsOf: thresholdCues(tick))
         cues.append(contentsOf: paceCues(segment, tick: tick, inSegment: inSegment))
         cues.append(contentsOf: splitCues(tick))
         return cues
+    }
+
+    /// Repeats "start running" or "start walking" until your pace shows you did.
+    ///
+    /// One buzz is indistinguishable from a text message arriving, so a missed cue means a
+    /// missed interval. Repeating removes the ambiguity: if it's still going, it meant you.
+    ///
+    /// Stops the moment the pace matches — and stops after a bounded number of repeats
+    /// regardless, because a treadmill, a lost fix, or a badly set threshold must not turn
+    /// into buzzing for the whole segment.
+    private func effortConfirmationCues(
+        _ segment: Segment,
+        tick: Tick,
+        inSegment: TimeInterval
+    ) -> [Cue] {
+        guard let confirmation = plan.advisories.effortConfirmation,
+              !effortConfirmed,
+              effortRepeats < confirmation.maxRepeats,
+              inSegment >= confirmation.repeatAfter,
+              tick.elapsed - lastEffortRepeatAt >= confirmation.repeatAfter
+        else { return [] }
+
+        // Unknown means indoors or a GPS fix that hasn't settled. Repeating a cue nobody
+        // can satisfy is worse than missing one, so silence is the right answer.
+        guard let matches = confirmation.matchesEffort(segment.kind, pace: paceSinceSegmentStart) else {
+            return []
+        }
+        if matches {
+            effortConfirmed = true
+            return []
+        }
+
+        effortRepeats += 1
+        lastEffortRepeatAt = tick.elapsed
+        return [.beginSegment(kind: segment.kind, index: segmentIndex, cycle: cycle)]
     }
 
     private func countdownCues(_ segment: Segment, inSegment: TimeInterval) -> [Cue] {
