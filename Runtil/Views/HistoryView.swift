@@ -10,6 +10,8 @@ struct HistoryView: View {
     /// Zones come from the library so the detail charts shade *your* Zone 2, not a default.
     let zones: HeartRateZones
 
+    @Environment(\.scenePhase) private var scenePhase
+
     @State private var workouts: [HKWorkout] = []
     @State private var status: Status = .loading
     @State private var pendingDeletion: HKWorkout?
@@ -64,6 +66,11 @@ struct HistoryView: View {
             .navigationTitle("History")
             .task { await load() }
             .refreshable { await load() }
+            // A run finished on the watch arrives while this tab is already open, so
+            // reloading only on first appearance means it never shows up.
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { Task { await load() } }
+            }
             // Confirmed rather than immediate: this removes the run from Health itself,
             // not just from runtil, and there is no undo.
             .confirmationDialog(
