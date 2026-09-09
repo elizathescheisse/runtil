@@ -18,6 +18,9 @@ struct RuntilApp: App {
                 HistoryView(zones: library.plans.first?.zones ?? .estimated(age: 35))
                     .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
             }
+            // Zones come from Health on first launch rather than waiting to be corrected.
+            // A wrong Zone 2 isn't cosmetic — it's training in the wrong range unaware.
+            .task { await library.applyHealthProfileIfNeeded() }
         }
     }
 }

@@ -107,35 +107,15 @@ struct PlanEditorView: View {
         }
     }
 
-    /// Switching drive mode rewrites each segment's trigger to one that mode can actually
-    /// use, so a plan can never end up with segments that contradict its own mode.
-    /// Moves heart-rate triggers onto the current zone boundaries.
-    ///
-    /// Only touches segments that were already sitting on the old boundaries, so a
-    /// deliberately custom target — "run until 145" — survives a zone edit intact.
+    /// Moves heart-rate triggers onto the newly chosen zone boundaries, leaving any
+    /// deliberately custom target alone.
     private func syncHeartRateTriggersToZones(previously old: HeartRateZones) {
         guard plan.driveMode == .heartRate else { return }
-        let zone = plan.advisories.heartRateGuard?.zone ?? 2
-        let wasRange = old.range(forZone: zone)
-        let nowRange = plan.zones.range(forZone: zone)
-
-        plan.segments = plan.segments.map { segment in
-            var updated = segment
-            switch segment.end {
-            // Only move a trigger that was sitting on the old boundary. One deliberately
-            // set elsewhere — "run until 145" — was a choice, and a zone edit shouldn't
-            // quietly overwrite it.
-            case .heartRateAtOrAbove(let bpm) where bpm == wasRange.upperBound:
-                updated.end = .heartRateAtOrAbove(bpm: nowRange.upperBound)
-            case .heartRateAtOrBelow(let bpm) where bpm == wasRange.lowerBound:
-                updated.end = .heartRateAtOrBelow(bpm: nowRange.lowerBound)
-            default:
-                break
-            }
-            return updated
-        }
+        plan.retargetHeartRateSegments(using: plan.zones, matching: old)
     }
 
+    /// Switching drive mode rewrites each segment's trigger to one that mode can actually
+    /// use, so a plan can never end up with segments that contradict its own mode.
     private func retargetSegments(to mode: DriveMode) {
         let z2 = plan.zones.range(forZone: 2)
         plan.segments = plan.segments.map { segment in

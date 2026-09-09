@@ -17,12 +17,17 @@ struct PlanLibraryView: View {
                             PlanSummaryRow(plan: plan)
                         }
                         .buttonStyle(.plain)
+                        // Delete has to be declared here. Custom trailing swipe actions
+                        // replace the row's default one, so relying on .onDelete alongside
+                        // them leaves no way to delete anything at all.
                         .swipeActions(edge: .trailing) {
+                            Button("Delete", role: .destructive) {
+                                library.delete(plan)
+                            }
                             Button("Duplicate") { library.duplicate(plan) }
                                 .tint(.blue)
                         }
                     }
-                    .onDelete(perform: library.delete)
                 } footer: {
                     SyncFooter(library: library)
                 }

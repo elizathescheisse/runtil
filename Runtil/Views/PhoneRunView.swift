@@ -42,6 +42,12 @@ private struct PlanPickerView: View {
 
     var body: some View {
         List {
+            if let imported = library.importedProfile {
+                ImportNotice(profile: imported, zones: library.plans.first?.zones) {
+                    library.dismissImportNotice()
+                }
+            }
+
             Section {
                 ForEach(library.plans) { plan in
                     Button {
@@ -280,5 +286,48 @@ private struct RunSummaryView: View {
 
             Button("Done") { controller.reset() }
         }
+    }
+}
+
+/// Says what was filled in from Health, rather than changing the numbers you're about to
+/// train against without mentioning it.
+private struct ImportNotice: View {
+    let profile: HealthProfileImporter.Profile
+    let zones: HeartRateZones?
+    let onDismiss: () -> Void
+
+    var body: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 6) {
+                Label("Zones set from Health", systemImage: "heart.text.square")
+                    .font(.subheadline.weight(.semibold))
+
+                Text(summary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if let zone2 = zones?.range(forZone: 2) {
+                    Text("Zone 2: \(zone2.lowerBound)–\(zone2.upperBound) bpm")
+                        .font(.caption.weight(.medium))
+                }
+
+                Text("Check these in Plans → Heart rate zones. A recorded maximum is only as high as something you've actually hit.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Button("Got it", action: onDismiss)
+                    .font(.caption)
+            }
+            .padding(.vertical, 2)
+        }
+    }
+
+    private var summary: String {
+        var parts: [String] = []
+        if let max = profile.observedMaxHeartRate { parts.append("max \(max) (recorded)") }
+        else if let max = profile.bestMaxHeartRate { parts.append("max \(max) (estimated)") }
+        if let resting = profile.restingHeartRate { parts.append("resting \(resting)") }
+        if let age = profile.age { parts.append("age \(age)") }
+        return parts.joined(separator: " · ")
     }
 }

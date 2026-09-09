@@ -117,6 +117,40 @@ public struct WorkoutPlan: Codable, Hashable, Identifiable, Sendable {
         modifiedAt = date
     }
 
+    /// Moves heart-rate triggers onto a zone's boundaries.
+    ///
+    /// A heart-rate segment stores a plain BPM, captured when the plan was built, so
+    /// changing zones without this leaves the plan chasing numbers the editor no longer
+    /// shows — every screen looks right and only the run is wrong.
+    ///
+    /// - Parameter previous: when given, only triggers sitting exactly on the *old*
+    ///   boundaries move. A target set deliberately elsewhere was a choice and shouldn't be
+    ///   quietly overwritten. Pass nil to retarget every heart-rate segment, which is what
+    ///   you want when replacing a placeholder nobody chose.
+    public mutating func retargetHeartRateSegments(
+        using zones: HeartRateZones,
+        matching previous: HeartRateZones? = nil
+    ) {
+        let zone = advisories.heartRateGuard?.zone ?? 2
+        let now = zones.range(forZone: zone)
+        let was = previous?.range(forZone: zone)
+
+        segments = segments.map { segment in
+            var updated = segment
+            switch segment.end {
+            case .heartRateAtOrAbove(let bpm):
+                guard was == nil || bpm == was?.upperBound else { break }
+                updated.end = .heartRateAtOrAbove(bpm: now.upperBound)
+            case .heartRateAtOrBelow(let bpm):
+                guard was == nil || bpm == was?.lowerBound else { break }
+                updated.end = .heartRateAtOrBelow(bpm: now.lowerBound)
+            default:
+                break
+            }
+            return updated
+        }
+    }
+
     /// Total planned duration when that's knowable — nil for HR- or distance-driven plans,
     /// and for plans that repeat forever.
     public var plannedDuration: TimeInterval? {

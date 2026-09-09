@@ -29,6 +29,16 @@ public struct HeartRateZones: Codable, Hashable, Sendable {
         self.method = method
     }
 
+    /// Whether these are still the untouched placeholder rather than anything the user
+    /// chose or imported.
+    ///
+    /// The distinction matters because it's what makes automatic import safe: filling in
+    /// a guess is helpful, overwriting a deliberate choice is not.
+    public var isUnpersonalisedDefault: Bool {
+        guard case .percentMax(let maxHR, let percentages) = method else { return false }
+        return maxHR == Self.tanakaMaxHR(age: 35) && percentages == Self.defaultPercentages
+    }
+
     /// A reasonable starting point for someone who hasn't measured anything:
     /// age-estimated max HR via the Tanaka formula, which fits observed data better
     /// than the older 220−age rule, especially past 40.

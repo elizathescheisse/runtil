@@ -148,6 +148,71 @@ final class WeatherTests: XCTestCase {
     }
 }
 
+final class ZoneRetargetTests: XCTestCase {
+
+    private let placeholder = HeartRateZones.estimated(age: 35)
+    private let real = HeartRateZones(method: .karvonen(maxHR: 194, restingHR: 63))
+
+    private func zoneTwoPlan(_ zones: HeartRateZones) -> WorkoutPlan {
+        .zoneTwoRunWalk(zones: zones)
+    }
+
+    func testPlaceholderIsRecognised() {
+        XCTAssertTrue(placeholder.isUnpersonalisedDefault)
+        XCTAssertFalse(real.isUnpersonalisedDefault)
+        // A direct or Karvonen model is by definition a choice someone made.
+        XCTAssertFalse(HeartRateZones(method: .direct(edges: [100,120,140,160,175,190])).isUnpersonalisedDefault)
+        // Even percent-of-max counts as chosen once the max isn't the age-35 guess.
+        XCTAssertFalse(HeartRateZones(method: .percentMax(maxHR: 194)).isUnpersonalisedDefault)
+    }
+
+    func testRetargetMovesTriggersToTheNewZone() {
+        var plan = zoneTwoPlan(placeholder)
+        let old = placeholder.range(forZone: 2)
+        XCTAssertEqual(plan.segments[0].end, .heartRateAtOrAbove(bpm: old.upperBound))
+
+        plan.retargetHeartRateSegments(using: real)
+
+        let now = real.range(forZone: 2)
+        XCTAssertEqual(plan.segments[0].end, .heartRateAtOrAbove(bpm: now.upperBound))
+        XCTAssertEqual(plan.segments[1].end, .heartRateAtOrBelow(bpm: now.lowerBound))
+        // The whole point: 129 was never going to be her ceiling.
+        XCTAssertGreaterThan(now.upperBound, old.upperBound + 15)
+    }
+
+    func testMatchingPreservesADeliberateTarget() {
+        var plan = zoneTwoPlan(placeholder)
+        // Someone deliberately set "run until 145" rather than the zone edge.
+        plan.segments[0].end = .heartRateAtOrAbove(bpm: 145)
+
+        plan.retargetHeartRateSegments(using: real, matching: placeholder)
+
+        XCTAssertEqual(plan.segments[0].end, .heartRateAtOrAbove(bpm: 145), "a chosen target must survive")
+        // The untouched one still follows the zone.
+        XCTAssertEqual(
+            plan.segments[1].end,
+            .heartRateAtOrBelow(bpm: real.range(forZone: 2).lowerBound)
+        )
+    }
+
+    func testWithoutMatchingEverythingMoves() {
+        var plan = zoneTwoPlan(placeholder)
+        plan.segments[0].end = .heartRateAtOrAbove(bpm: 145)
+
+        // No `matching:` — replacing a placeholder nobody chose, so nothing is preserved.
+        plan.retargetHeartRateSegments(using: real)
+
+        XCTAssertEqual(plan.segments[0].end, .heartRateAtOrAbove(bpm: real.range(forZone: 2).upperBound))
+    }
+
+    func testNonHeartRateSegmentsAreUntouched() {
+        var plan = WorkoutPlan.timedIntervals(run: 90, walk: 60, zones: placeholder)
+        let before = plan.segments.map(\.end)
+        plan.retargetHeartRateSegments(using: real)
+        XCTAssertEqual(plan.segments.map(\.end), before)
+    }
+}
+
 final class RunningComfortTests: XCTestCase {
 
     /// The distinction that motivates using dew point at all.
