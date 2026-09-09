@@ -131,7 +131,7 @@
 		E837BF326D3D3675EF3CB888 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
 		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
-		"TEMP_37C7FA32-702D-4240-878F-DA0CA6AF9921" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		"TEMP_1886E0A2-A071-4C86-937A-1FB37C1B7396" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -314,10 +314,10 @@
 			path = Workout;
 			sourceTree = "<group>";
 		};
-		"TEMP_399ADCFB-23A2-4FCF-9166-734FFA8DD051" /* haptics */ = {
+		"TEMP_FE72A410-9CF2-430C-8205-16FF6FADBA99" /* haptics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_37C7FA32-702D-4240-878F-DA0CA6AF9921" /* Local.xcconfig */,
+				"TEMP_1886E0A2-A071-4C86-937A-1FB37C1B7396" /* Local.xcconfig */,
 			);
 			path = haptics;
 			sourceTree = "<group>";
@@ -554,7 +554,7 @@
 		};
 		3427D6FE32EC695648C53188 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_37C7FA32-702D-4240-878F-DA0CA6AF9921" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_1886E0A2-A071-4C86-937A-1FB37C1B7396" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -667,13 +667,13 @@
 				PRODUCT_NAME = runtil;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
 		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_37C7FA32-702D-4240-878F-DA0CA6AF9921" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_1886E0A2-A071-4C86-937A-1FB37C1B7396" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -748,7 +748,7 @@
 				PRODUCT_NAME = runtil;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

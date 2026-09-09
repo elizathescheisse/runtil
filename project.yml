@@ -44,7 +44,9 @@ targets:
         PRODUCT_NAME: runtil
         INFOPLIST_FILE: Runtil/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        TARGETED_DEVICE_FAMILY: "1,2"
+        # iPhone only. This is an app you strap to your arm; shipping it for iPad would
+        # mean supporting landscape on a device nobody runs with.
+        TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_ENTITLEMENTS: Runtil/Runtil.entitlements
 

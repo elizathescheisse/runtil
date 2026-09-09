@@ -47,8 +47,9 @@ private struct PlanPickerView: View {
                             }
                             Spacer()
                             if !controller.canRun(plan) {
-                                // Rather than let her start a plan that can't work, say why.
-                                Label("Needs strap", systemImage: "sensor.tag.radiowaves.forward")
+                                // Names what's missing rather than prescribing one fix —
+                                // the plan needs a heart rate from somewhere.
+                                Label("Needs heart rate", systemImage: "heart.slash")
                                     .font(.caption2)
                                     .foregroundStyle(.orange)
                                     .labelStyle(.titleAndIcon)
@@ -60,7 +61,7 @@ private struct PlanPickerView: View {
             } header: {
                 Text("Plans")
             } footer: {
-                Text("Your phone has no heart rate sensor, so heart-rate plans need a Bluetooth chest strap. Time, distance and pace work on their own.")
+                Text("Time, distance and pace plans work on their own. Heart-rate plans need a live reading, which on iPhone means a Bluetooth strap — an Apple Watch can't feed heart rate to your phone fast enough to cue you, so run those from the watch app instead.")
             }
 
             Section("Heart rate strap") {

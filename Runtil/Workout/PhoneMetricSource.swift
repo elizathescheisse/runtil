@@ -73,11 +73,11 @@ final class PhoneMetricSource: NSObject {
         configuration.activityType = .running
         configuration.locationType = .outdoor
 
-        guard let builder = try? HKWorkoutBuilder(
+        let builder = HKWorkoutBuilder(
             healthStore: store,
             configuration: configuration,
             device: .local()
-        ) else { return }
+        )
 
         self.builder = builder
         self.routeBuilder = builder.seriesBuilder(for: HKSeriesType.workoutRoute()) as? HKWorkoutRouteBuilder

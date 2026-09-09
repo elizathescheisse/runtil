@@ -63,10 +63,23 @@ final class LiveMetricSource: NSObject, MetricSource {
 
     // MARK: Authorization
 
+    /// Everything the workout needs permission to *write*.
+    ///
+    /// The workout type alone isn't enough. `HKLiveWorkoutDataSource` collects heart rate,
+    /// energy and distance during the session, and those samples are saved with the
+    /// workout when it finishes — but only for types we're authorised to share. Omitting
+    /// them yields a workout with a duration and nothing else: no calories, no distance,
+    /// no rings credit. The route is likewise a separate series type.
     static var shareTypes: Set<HKSampleType> {
-        // The route is a separate series type; without permission to write it the workout
-        // saves fine but has no map.
-        [HKQuantityType.workoutType(), HKSeriesType.workoutRoute()]
+        [
+            HKQuantityType.workoutType(),
+            HKSeriesType.workoutRoute(),
+            HKQuantityType(.heartRate),
+            HKQuantityType(.activeEnergyBurned),
+            HKQuantityType(.basalEnergyBurned),
+            HKQuantityType(.distanceWalkingRunning),
+            HKQuantityType(.stepCount)
+        ]
     }
 
     static var readTypes: Set<HKObjectType> {

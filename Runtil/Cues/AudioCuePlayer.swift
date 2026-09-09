@@ -28,10 +28,13 @@ final class AudioCuePlayer {
         guard !isConfigured else { return }
 
         let session = AVAudioSession.sharedInstance()
+        // A2DP only, deliberately. The other Bluetooth option is HFP — the mono
+        // call profile — and allowing it lets iOS route a run's audio there, dropping
+        // your music to phone-call quality for the sake of saying "Walk".
         try session.setCategory(
             .playback,
             mode: .spokenAudio,
-            options: [.mixWithOthers, .duckOthers, .allowBluetooth, .allowBluetoothA2DP]
+            options: [.mixWithOthers, .duckOthers, .allowBluetoothA2DP]
         )
         try session.setActive(true)
 
