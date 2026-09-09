@@ -7,8 +7,14 @@ PAGE ?= metrics
 .PHONY: project test build build-watch run-watch run-phone shot clean
 
 ## Regenerate Runtil.xcodeproj from project.yml
-project:
+project: Local.xcconfig
 	xcodegen generate
+
+# Signing config is per-machine and gitignored, so a fresh clone needs one before
+# XcodeGen can resolve it.
+Local.xcconfig:
+	cp Local.xcconfig.example $@
+	@echo "Created Local.xcconfig — set DEVELOPMENT_TEAM in it before building to a device."
 
 ## Engine tests — pure Swift, no device, sub-second
 test:

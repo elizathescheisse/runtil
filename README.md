@@ -130,8 +130,12 @@ PLAN="1:30" PAGE=log make run-watch   # jump straight into a plan and watch the 
 
 ## Installing on your watch
 
-Open `Runtil.xcodeproj`, set your development team on all three targets (`Runtil`,
-`RuntilWatch`, `RuntilWatchWidgets`), and run to your watch. On a free personal team the app
+Run `make project` once — it creates `Local.xcconfig` from the example. Put your team ID in
+it (Xcode → Settings → Accounts, or `security find-certificate -c "Apple Development" -p |
+openssl x509 -noout -subject`), then open `Runtil.xcodeproj` and run to your watch.
+
+Signing lives in that gitignored file rather than in Xcode's UI for two reasons: your team ID
+never lands in the public repo, and regenerating the project can't wipe it. On a free personal team the app
 expires after 7 days and needs reinstalling; HealthKit and background workouts work fine
 either way.
 

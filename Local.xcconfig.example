@@ -1,0 +1,4 @@
+// Copy to Local.xcconfig and set your own team, or run `make project` which does it for you.
+// Find your team ID: Xcode → Settings → Accounts → your Apple ID → the ID beside your team,
+// or run: security find-certificate -c "Apple Development" -p | openssl x509 -noout -subject
+DEVELOPMENT_TEAM =

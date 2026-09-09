@@ -8,3 +8,6 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
+
+# Per-machine signing config (team ID). Copy from Local.xcconfig.example.
+Local.xcconfig
