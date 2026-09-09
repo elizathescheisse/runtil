@@ -12,7 +12,18 @@ struct PhoneRunView: View {
             Group {
                 // A run on the wrist wins the screen: the watch owns the session, and
                 // showing the plan list underneath it would invite starting a second one.
-                if let mirrored = mirror.state, mirror.isActive {
+                if mirror.isActive, mirror.state == nil {
+                    // Connected but nothing received yet. Saying so beats a blank screen
+                    // that looks identical to no run at all.
+                    VStack(spacing: 12) {
+                        ProgressView()
+                        Text("Connected to your watch")
+                            .font(.headline)
+                        Text("Waiting for the first update…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if let mirrored = mirror.state, mirror.isActive {
                     MirroredRunView(
                         state: mirrored,
                         isActive: true,

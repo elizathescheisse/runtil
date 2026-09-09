@@ -56,6 +56,9 @@ final class MirroredWorkoutObserver: NSObject {
 
     private(set) var state: MirroredState?
     private(set) var isActive = false
+    /// Distinguishes "the watch connected but hasn't sent anything" from "no watch run at
+    /// all". Without it both look identical: a blank screen.
+    private(set) var hasReceivedData = false
     private(set) var availability: Availability = .checking
 
     /// Speaks cues while the watch runs the session. The watch handles heart rate and
@@ -71,6 +74,24 @@ final class MirroredWorkoutObserver: NSObject {
         super.init()
         checkAvailability()
         beginObserving()
+        Task { await requestAuthorizationIfNeeded() }
+    }
+
+    /// Receiving a mirrored session needs workout authorization on this device.
+    ///
+    /// It was only ever requested by the History tab, so on a phone where that had never
+    /// been opened the mirroring handler had nothing to fire into — the watch would report
+    /// a connected phone while the phone knew nothing about it.
+    private func requestAuthorizationIfNeeded() async {
+        guard HKHealthStore.isHealthDataAvailable() else { return }
+        try? await store.requestAuthorization(
+            toShare: [],
+            read: [
+                HKObjectType.workoutType(),
+                HKQuantityType(.heartRate),
+                HKQuantityType(.distanceWalkingRunning)
+            ]
+        )
     }
 
     /// What the phone can actually offer, so the UI explains the real situation rather
@@ -119,6 +140,7 @@ final class MirroredWorkoutObserver: NSObject {
         session = mirrored
         mirrored.delegate = self
         isActive = true
+        hasReceivedData = false
         lastSpokenSequence = 0
         // Background audio is declared, so this keeps working with the phone pocketed.
         try? audio.activate()
@@ -165,6 +187,7 @@ extension MirroredWorkoutObserver: HKWorkoutSessionDelegate {
         guard let newest = data.compactMap(MirroredState.decoded(from:)).last else { return }
         Task { @MainActor in
             self.state = newest
+            self.hasReceivedData = true
             self.isActive = !newest.isFinished
             self.speakIfNew(newest)
         }
