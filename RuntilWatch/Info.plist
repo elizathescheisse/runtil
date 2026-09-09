@@ -36,10 +36,6 @@
 	<string>runtil saves your runs to Health so they count toward your activity rings.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>runtil uses GPS to measure your pace and distance so it can cue you on splits and pace targets.</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>watch-companion</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
