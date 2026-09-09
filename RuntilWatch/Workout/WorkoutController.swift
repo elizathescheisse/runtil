@@ -237,10 +237,17 @@ final class WorkoutController {
         state = .finished
         isPromptingEffortChange = false
 
+        // The run usually ends mid-interval, so the segment you were in has to be closed
+        // by hand or it never reaches the breakdown at all.
+        if let engine, let tick = latestTick {
+            engine.closeOpenSegment(at: tick.elapsed, totalDistance: tick.totalDistance)
+        }
+
         let finishing = source
+        let segments = engine?.segmentLog ?? []
         source = nil
         await finishing?.stop()
-        await finishing?.finish()
+        await finishing?.finish(segments: segments)
     }
 
     func reset() {

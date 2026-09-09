@@ -114,5 +114,5 @@ final class SimulatedMetricSource: MetricSource {
         continuation?.finish()
     }
 
-    func finish() async {}
+    func finish(segments: [SegmentRecord]) async {}
 }

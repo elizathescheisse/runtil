@@ -153,12 +153,21 @@ final class PhoneMetricSource: NSObject {
         return metadata
     }
 
-    func finish() async {
+    func finish(segments: [SegmentRecord]) async {
         guard let builder else { return }
 
         let metadata = workoutMetadata
         if !metadata.isEmpty {
             try? await builder.addMetadata(metadata)
+        }
+        // Before ending collection: a builder that has closed refuses further events.
+        //
+        // Our own start date, not the builder's. Segment times are elapsed seconds measured
+        // from this exact instant, so anything else risks sliding every boundary by however
+        // much the two disagree.
+        if let start = startDate, !segments.isEmpty {
+            let events = WorkoutSegmentEvents.events(for: segments, startingAt: start)
+            if !events.isEmpty { try? await builder.addWorkoutEvents(events) }
         }
         try? await builder.endCollection(at: Date())
         if savesToHealth {

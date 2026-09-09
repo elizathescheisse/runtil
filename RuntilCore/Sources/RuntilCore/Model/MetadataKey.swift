@@ -8,4 +8,9 @@ public enum MetadataKey {
     /// Dew point in degrees Celsius — the number that actually predicts how hard the air
     /// makes a run, and which HealthKit has no key of its own for.
     public static let dewPointCelsius = "com.ergilp.runtil.dewPointCelsius"
+
+    /// Which kind of segment a `.segment` workout event was. HealthKit records that a lap
+    /// happened but has no notion of it being a run rather than a walk, and that
+    /// distinction is the whole point of the breakdown.
+    public static let segmentKind = "com.ergilp.runtil.segmentKind"
 }

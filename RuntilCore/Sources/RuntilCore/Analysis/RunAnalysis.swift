@@ -180,6 +180,107 @@ public enum RunAnalysis {
         return samples.last?.elapsed ?? 0
     }
 
+    // MARK: - Segments
+
+    /// One finished segment with the numbers filled in.
+    public struct SegmentSummary: Equatable, Sendable, Identifiable {
+        /// Position in the run, counting from one. A plan repeated eight times has eight
+        /// segment 0s, and only the order tells them apart.
+        public let ordinal: Int
+        public let kind: SegmentKind
+        public let start: TimeInterval
+        public let duration: TimeInterval
+        public let distanceMeters: Double
+        public let averageHeartRate: Int?
+        public let maxHeartRate: Int?
+
+        public var id: Int { ordinal }
+
+        /// Seconds per metre, comparable with `Tick.instantPace` and `Format.pace`.
+        ///
+        /// Nil rather than zero when the segment covered no ground: a walk recorded
+        /// indoors has no pace, and showing 0:00/mi would read as impossibly fast.
+        public var secondsPerMeter: Double? {
+            guard distanceMeters > 1, duration > 0 else { return nil }
+            return duration / distanceMeters
+        }
+    }
+
+    /// Fills in distance and heart rate for segment boundaries recorded during the run.
+    ///
+    /// Boundaries are all that gets saved; everything else is derived here from the samples
+    /// HealthKit already holds. That keeps what's written during a run tiny, and means a
+    /// run recorded before this existed gains nothing but loses nothing either.
+    ///
+    /// - Parameters:
+    ///   - segments: start/end elapsed times, in order.
+    ///   - heartRate: bpm over elapsed time.
+    ///   - distances: cumulative metres over elapsed time.
+    public static func segmentBreakdown(
+        segments: [(kind: SegmentKind, start: TimeInterval, end: TimeInterval)],
+        heartRate: [(elapsed: TimeInterval, bpm: Int)],
+        distances: [(elapsed: TimeInterval, distance: Double)]
+    ) -> [SegmentSummary] {
+        let sortedDistances = distances.sorted { $0.elapsed < $1.elapsed }
+
+        return segments.enumerated().map { position, segment in
+            // Half-open, so a reading landing exactly on a boundary belongs to the segment
+            // starting there and not to both. The last segment takes its closing sample,
+            // which otherwise falls off the end of the run entirely.
+            let isLast = position == segments.count - 1
+            let within = heartRate.filter {
+                $0.elapsed >= segment.start && (isLast ? $0.elapsed <= segment.end : $0.elapsed < segment.end)
+            }
+            let beats = within.map(\.bpm)
+
+            let covered: Double
+            if sortedDistances.count > 1 {
+                covered = max(
+                    0,
+                    distance(atElapsed: segment.end, in: sortedDistances)
+                        - distance(atElapsed: segment.start, in: sortedDistances)
+                )
+            } else {
+                covered = 0
+            }
+
+            return SegmentSummary(
+                ordinal: position + 1,
+                kind: segment.kind,
+                start: segment.start,
+                duration: max(0, segment.end - segment.start),
+                distanceMeters: covered,
+                averageHeartRate: beats.isEmpty ? nil : Int((Double(beats.reduce(0, +)) / Double(beats.count)).rounded()),
+                maxHeartRate: beats.max()
+            )
+        }
+    }
+
+    /// Cumulative distance at a moment, interpolated between the fixes either side.
+    ///
+    /// The mirror of `elapsed(atDistance:)`. A segment boundary lands wherever your heart
+    /// rate or the clock put it, which is almost never exactly on a GPS fix — rounding to
+    /// the nearer one would hand a second or two of distance to whichever segment happened
+    /// to be adjacent.
+    static func distance(
+        atElapsed target: TimeInterval,
+        in samples: [(elapsed: TimeInterval, distance: Double)]
+    ) -> Double {
+        guard var previous = samples.first else { return 0 }
+        if target <= previous.elapsed { return previous.distance }
+
+        for sample in samples {
+            if sample.elapsed >= target {
+                let span = sample.elapsed - previous.elapsed
+                guard span > 0 else { return sample.distance }
+                let fraction = (target - previous.elapsed) / span
+                return previous.distance + (sample.distance - previous.distance) * fraction
+            }
+            previous = sample
+        }
+        return samples.last?.distance ?? 0
+    }
+
     // MARK: - Heart rate zones
 
     public struct ZoneTime: Equatable, Sendable, Identifiable {

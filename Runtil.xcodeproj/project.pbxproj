@@ -22,6 +22,7 @@
 		3CFA555A1EE268C66D869F6B /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453CBF555AE0D72C3D3DE617 /* HapticPlayer.swift */; };
 		3E786DE75C4B29F24E8C149D /* PhoneRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19032F4F78EBD6799732D36A /* PhoneRunView.swift */; };
 		406402AE1C6A6E9E5639E36D /* PhoneCuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0C10F8CCEFB6908EDBE72B /* PhoneCuePlayer.swift */; };
+		507FDB1CC57D628AE5B1CB16 /* WorkoutSegmentEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F82E6F1297F065D60EEC23 /* WorkoutSegmentEvents.swift */; };
 		53C81091ADC496E0BCC7BB8B /* SimulatedMetricSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA7FA92D9CDD32B690E5BC2 /* SimulatedMetricSource.swift */; };
 		543244636629047527941985 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4833924CC3DE6DC9DD143C6 /* SummaryView.swift */; };
 		6A8518985B1C0118EC4847BE /* PaceTargetEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B65D231A8BD09AA91716D35 /* PaceTargetEditorView.swift */; };
@@ -37,6 +38,7 @@
 		8F6042D22125174D725290BC /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E837BF326D3D3675EF3CB888 /* HistoryView.swift */; };
 		9578770EA4C80B465B612656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4267ADC008F5E77C6C3566F5 /* Assets.xcassets */; };
 		9A020A64A969A956154AF944 /* HealthProfileImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41D1B351F0E8311C391AECE /* HealthProfileImporter.swift */; };
+		9A0436041AAC817B3624C741 /* WorkoutSegmentEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F82E6F1297F065D60EEC23 /* WorkoutSegmentEvents.swift */; };
 		A11E6CA417BAB1817B84C599 /* ResponseProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA551DE6192AAD328D95C1F /* ResponseProfileEditorView.swift */; };
 		A43F2E0C3B4CA5174C6DAE3A /* RuntilWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A9C145A547ACBE2C965853F5 /* StartRunIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79409A51839CC85FB8073C5 /* StartRunIntent.swift */; };
@@ -96,6 +98,7 @@
 
 /* Begin PBXFileReference section */
 		03C666B74DFCB50626BB0A05 /* RuntilWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RuntilWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		03F82E6F1297F065D60EEC23 /* WorkoutSegmentEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSegmentEvents.swift; sourceTree = "<group>"; };
 		04BE87DAE855ED941B1A504F /* WorkoutDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutDetailView.swift; sourceTree = "<group>"; };
 		14EDCAEE8B4EBB6D34133241 /* PlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanStore.swift; sourceTree = "<group>"; };
 		15CD8AC1B818AC8B6321B2A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -143,7 +146,7 @@
 		F0A4C32787AB066C2B16A9FE /* HeartRateMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitorView.swift; sourceTree = "<group>"; };
 		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
 		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
-		"TEMP_78C0FDFE-FCDA-4281-9073-18CE803A0464" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		"TEMP_84F0F900-B58E-4ABC-A626-2C89BE3426B7" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -266,6 +269,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		7AF8CEC1BF2BBC6EEC8C1BDC /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				03F82E6F1297F065D60EEC23 /* WorkoutSegmentEvents.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		8C3F6EEEAE54990CCA6639D0 = {
 			isa = PBXGroup;
 			children = (
@@ -273,6 +284,7 @@
 				9E8D1B35B062779D0912355F /* Runtil */,
 				6DFF7117F81203B5D754140F /* RuntilWatch */,
 				3F030E470535EC70B0FA6C41 /* RuntilWatchWidgets */,
+				7AF8CEC1BF2BBC6EEC8C1BDC /* Shared */,
 				7225CE51DFA4F0C064FCBA74 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -332,10 +344,10 @@
 			path = Workout;
 			sourceTree = "<group>";
 		};
-		"TEMP_DFB63F4A-0B42-4CEC-A644-73BAC9A03102" /* haptics */ = {
+		"TEMP_0E5430A7-2940-4DBE-AD66-02921AA65C07" /* haptics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_78C0FDFE-FCDA-4281-9073-18CE803A0464" /* Local.xcconfig */,
+				"TEMP_84F0F900-B58E-4ABC-A626-2C89BE3426B7" /* Local.xcconfig */,
 			);
 			path = haptics;
 			sourceTree = "<group>";
@@ -494,6 +506,7 @@
 				8F40360B03F6AE04FD8FFF98 /* RuntilApp.swift in Sources */,
 				E7A43C277C464DB78470FB36 /* WorkoutDetailLoader.swift in Sources */,
 				1E00ED1818809DB003BF0891 /* WorkoutDetailView.swift in Sources */,
+				507FDB1CC57D628AE5B1CB16 /* WorkoutSegmentEvents.swift in Sources */,
 				8BFA3AA863212844DD8203D1 /* ZoneEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -526,6 +539,7 @@
 				A9C145A547ACBE2C965853F5 /* StartRunIntent.swift in Sources */,
 				543244636629047527941985 /* SummaryView.swift in Sources */,
 				04A25AC1B738B4C8C1F42780 /* WorkoutController.swift in Sources */,
+				9A0436041AAC817B3624C741 /* WorkoutSegmentEvents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,7 +592,7 @@
 		};
 		3427D6FE32EC695648C53188 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_78C0FDFE-FCDA-4281-9073-18CE803A0464" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_84F0F900-B58E-4ABC-A626-2C89BE3426B7" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -612,7 +626,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -697,7 +711,7 @@
 		};
 		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_78C0FDFE-FCDA-4281-9073-18CE803A0464" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_84F0F900-B58E-4ABC-A626-2C89BE3426B7" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -731,7 +745,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

@@ -28,6 +28,9 @@ struct WorkoutDetailView: View {
             if !loader.heartRateSamples.isEmpty {
                 heartRateChart
             }
+            if !loader.segments.isEmpty {
+                segmentsSection
+            }
             if !loader.splits.isEmpty {
                 paceChart
                 splitsSection
@@ -142,6 +145,51 @@ struct WorkoutDetailView: View {
             }
             .chartYAxisLabel("min/\(unit.abbreviation)")
             .frame(height: 160)
+        }
+    }
+
+    /// What each interval actually cost you.
+    ///
+    /// Splits cut the run into equal distances, which says nothing about a plan whose whole
+    /// point is alternating effort — a mile that straddles two runs and a walk averages
+    /// into a pace you never held. These are the run's own boundaries instead.
+    private var segmentsSection: some View {
+        Section("Segments") {
+            ForEach(loader.segments) { segment in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(segment.kind.displayName.uppercased())
+                            .font(.caption.weight(.heavy))
+                            .foregroundStyle(segment.kind.isEffort ? .green : .orange)
+                        Text("\(segment.ordinal)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(Format.duration(segment.duration))
+                            .monospacedDigit()
+                    }
+                    HStack(spacing: 12) {
+                        Text(Format.distance(meters: segment.distanceMeters, unit: unit))
+                        // Nil pace means no GPS — a treadmill, or a fix that never
+                        // settled. Blank says that; "0:00 /mi" would claim otherwise.
+                        if let pace = segment.secondsPerMeter {
+                            Text(Format.pace(secondsPerMeter: pace, unit: unit))
+                        }
+                        Spacer()
+                        if let average = segment.averageHeartRate {
+                            Text("\(average) bpm")
+                            if let peak = segment.maxHeartRate, peak > average {
+                                Text("max \(peak)")
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                }
+                .padding(.vertical, 2)
+            }
         }
     }
 

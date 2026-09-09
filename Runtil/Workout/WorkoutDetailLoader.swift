@@ -15,6 +15,9 @@ final class WorkoutDetailLoader {
     private(set) var heartRateSamples: [(elapsed: TimeInterval, bpm: Int)] = []
     private(set) var zoneTimes: [RunAnalysis.ZoneTime] = []
     private(set) var splits: [RunAnalysis.Split] = []
+    /// Per-segment numbers, present only for runs recorded by runtil — nothing else writes
+    /// the boundaries, and without them there's nothing to break the run down by.
+    private(set) var segments: [RunAnalysis.SegmentSummary] = []
     private(set) var altitudes: [Double] = []
 
     private(set) var totalDistance: Double?
@@ -24,6 +27,8 @@ final class WorkoutDetailLoader {
     private(set) var elevationGain: Double?
     private(set) var weather: WeatherSnapshot?
     private(set) var effortScore: Double?
+
+    private var distanceSamples: [(elapsed: TimeInterval, distance: Double)] = []
 
     private let store = HKHealthStore()
 
@@ -65,7 +70,15 @@ final class WorkoutDetailLoader {
                 every: DistanceUnit.miles.metersPerUnit
             )
             attachHeartRates(to: &splits, samples: samples)
+            distanceSamples = samples
         }
+
+        // After the samples are in: the breakdown is derived from them, not stored.
+        segments = RunAnalysis.segmentBreakdown(
+            segments: WorkoutSegmentEvents.segments(in: workout),
+            heartRate: heartRateSamples,
+            distances: distanceSamples
+        )
 
         effortScore = await loadEffortScore(for: workout)
     }

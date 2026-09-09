@@ -25,6 +25,12 @@ public final class CueEngine {
     /// Altitudes, for elevation gain. Fed in by the caller since GPS lives outside here.
     public private(set) var altitudes: [Double] = []
 
+    /// Every segment that has finished, in order.
+    ///
+    /// Written as the run happens rather than reconstructed afterwards, because on an
+    /// HR-driven or manual plan nothing else knows where the boundaries fell.
+    public private(set) var segmentLog: [SegmentRecord] = []
+
     public func recordAltitude(_ metres: Double) {
         altitudes.append(metres)
     }
@@ -248,6 +254,7 @@ public final class CueEngine {
 
     /// End the current segment and open the next, wrapping and counting cycles.
     private func endSegment(from segment: Segment, tick: Tick) -> [Cue] {
+        recordSegment(segment, endingAt: tick)
         startLagProbe(leaving: segment, at: tick.elapsed)
 
         segmentIndex += 1
@@ -275,6 +282,35 @@ public final class CueEngine {
             return [.workoutComplete]
         }
         return [.beginSegment(kind: next.kind, index: segmentIndex, cycle: cycle)]
+    }
+
+    private func recordSegment(_ segment: Segment, endingAt tick: Tick) {
+        segmentLog.append(
+            SegmentRecord(
+                kind: segment.kind,
+                index: segmentIndex,
+                cycle: cycle,
+                start: segmentStartElapsed,
+                end: tick.elapsed,
+                startDistance: segmentStartDistance,
+                endDistance: tick.totalDistance
+            )
+        )
+    }
+
+    /// Closes whatever segment is still open, so ending a run mid-interval still records
+    /// the part you did.
+    ///
+    /// Idempotent: the caller can't easily tell whether the run ended because the plan ran
+    /// out (which closes the segment itself) or because you pressed the button, and having
+    /// to know would be a good way to end up with the last segment logged twice.
+    public func closeOpenSegment(at elapsed: TimeInterval, totalDistance: Double) {
+        guard started, let segment = currentSegment else { return }
+        let alreadyLogged = segmentLog.contains {
+            $0.index == segmentIndex && $0.cycle == cycle && $0.start == segmentStartElapsed
+        }
+        guard !alreadyLogged, elapsed > segmentStartElapsed else { return }
+        recordSegment(segment, endingAt: Tick(elapsed: elapsed, totalDistance: totalDistance))
     }
 
     /// Ends the current segment early on a user tap. Drives `.manual` plans, and lets you

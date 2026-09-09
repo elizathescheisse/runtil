@@ -17,7 +17,10 @@ protocol MetricSource: AnyObject {
     func start() async throws
     func stop() async
     /// Saves the workout where the source supports it; a no-op for the simulation.
-    func finish() async
+    ///
+    /// `segments` are the run's real boundaries, which only the engine knows — an
+    /// HR-driven plan has no fixed interval lengths to reconstruct them from later.
+    func finish(segments: [SegmentRecord]) async
 }
 
 /// A failure worth explaining to the runner in words, rather than a raw error string.

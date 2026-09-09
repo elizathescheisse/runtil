@@ -20,7 +20,7 @@ settings:
     MARKETING_VERSION: "1.0"
     # Bumped so a fresh install can never be mistaken for a cached copy of an
     # earlier build — watchOS matched the old bundle and failed verification.
-    CURRENT_PROJECT_VERSION: "27"
+    CURRENT_PROJECT_VERSION: "28"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     GENERATE_INFOPLIST_FILE: NO
 
@@ -82,6 +82,7 @@ targets:
     platform: iOS
     sources:
       - path: Runtil
+      - path: Shared
     dependencies:
       - package: RuntilCore
       - target: RuntilWatch
@@ -104,6 +105,7 @@ targets:
     platform: watchOS
     sources:
       - path: RuntilWatch
+      - path: Shared
     dependencies:
       - package: RuntilCore
       - target: RuntilWatchWidgets

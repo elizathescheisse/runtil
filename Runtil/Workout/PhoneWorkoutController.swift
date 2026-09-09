@@ -116,8 +116,15 @@ final class PhoneWorkoutController {
     func finish() async {
         consumeTask?.cancel()
         consumeTask = nil
+
+        // The run usually ends mid-interval, so the segment you were in has to be closed
+        // by hand or it never reaches the breakdown at all.
+        if let engine, let tick = latestTick {
+            engine.closeOpenSegment(at: tick.elapsed, totalDistance: tick.totalDistance)
+        }
+
         await source?.stop()
-        await source?.finish()
+        await source?.finish(segments: engine?.segmentLog ?? [])
         source = nil
         cues.deactivate()
         UIApplication.shared.isIdleTimerDisabled = false
