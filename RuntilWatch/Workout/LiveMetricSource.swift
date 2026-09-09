@@ -32,8 +32,13 @@ final class LiveMetricSource: NSObject, MetricSource {
     private(set) var isMirroring = false
 
     /// Whether this build is actually allowed to keep location running in the background.
+    ///
+    /// Reads `UIBackgroundModes` deliberately. CoreLocation checks that key even on
+    /// watchOS, where everything else uses `WKBackgroundModes` — and it calls the mismatch
+    /// "a fatal error" rather than ignoring it. Checking the wrong key here is worse than
+    /// having no guard, because it reports permission that was never granted.
     static var declaresLocationBackgroundMode: Bool {
-        let modes = Bundle.main.object(forInfoDictionaryKey: "WKBackgroundModes") as? [String]
+        let modes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String]
         return modes?.contains("location") ?? false
     }
 

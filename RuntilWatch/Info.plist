@@ -28,11 +28,16 @@
 	<true/>
 	<key>WKBackgroundModes</key>
 	<array>
-		<!-- workout-processing earns background runtime for the session and lets haptics
-		     reach the wrist with the screen off. `location` is separately required before
-		     allowsBackgroundLocationUpdates may be set at all — without it CoreLocation
-		     raises an exception and takes the app down the instant a run starts. -->
+		<!-- Earns background runtime for the session, and is what lets haptics reach the
+		     wrist with the screen off. -->
 		<string>workout-processing</string>
+	</array>
+	<!-- CoreLocation checks UIBackgroundModes, not WKBackgroundModes, even on watchOS:
+	     "Setting this property to YES when UIBackgroundModes does not include location is
+	     a fatal error." So background location needs this key specifically — declaring
+	     location under WKBackgroundModes looks right and does nothing. -->
+	<key>UIBackgroundModes</key>
+	<array>
 		<string>location</string>
 	</array>
 	<key>NSHealthShareUsageDescription</key>
