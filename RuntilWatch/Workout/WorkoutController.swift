@@ -212,10 +212,16 @@ final class WorkoutController {
     func finish() async {
         consumeTask?.cancel()
         consumeTask = nil
-        await source?.stop()
-        await source?.finish()
-        source = nil
+
+        // Marked finished up front. Saving a workout involves several awaits on HealthKit,
+        // and gating the screen on them means one slow call leaves you staring at a run
+        // you already ended, pressing a button that appears to do nothing.
         state = .finished
+
+        let finishing = source
+        source = nil
+        await finishing?.stop()
+        await finishing?.finish()
     }
 
     func reset() {

@@ -1,13 +1,30 @@
 import SwiftUI
+import UIKit
 import RuntilCore
+
+/// Exists solely to install the mirroring handler at genuine launch time.
+///
+/// The phone can be woken in the background purely to receive a mirrored workout, so the
+/// handler must already be in place by then — later is too late, and the session is simply
+/// never delivered.
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        _ = MirroredWorkoutObserver.shared
+        return true
+    }
+}
 
 @main
 struct RuntilApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var library = PlanLibrary()
     @State private var runController = PhoneWorkoutController()
     /// Created at launch, not lazily: the phone can be woken in the background purely to
     /// receive a mirrored session, and the handler has to already be in place when it is.
-    @State private var mirror = MirroredWorkoutObserver()
+    private var mirror: MirroredWorkoutObserver { .shared }
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {

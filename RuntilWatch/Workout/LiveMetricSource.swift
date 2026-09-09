@@ -67,6 +67,9 @@ final class LiveMetricSource: NSObject, MetricSource {
 
     private var continuation: AsyncStream<Tick>.Continuation?
     private var tickTask: Task<Void, Never>?
+    /// Resumed when the session reports it has ended, so teardown can wait for the real
+    /// transition instead of assuming `end()` completed synchronously.
+    private var sessionEndContinuation: CheckedContinuation<Void, Never>?
 
     let ticks: AsyncStream<Tick>
 
@@ -209,8 +212,44 @@ final class LiveMetricSource: NSObject, MetricSource {
         tickTask?.cancel()
         tickTask = nil
         locationManager.stopUpdatingLocation()
-        session?.end()
+
+        // `end()` returns immediately but the session transitions asynchronously, and the
+        // builder cannot end collection until it has. Calling endCollection straight after
+        // end() waits forever for a change that already happened without it — which left
+        // the run neither stopped nor saved, and the End button looking inert.
+        if let session, session.state != .ended, session.state != .stopped {
+            session.end()
+            await waitForSessionEnd()
+        } else {
+            session?.end()
+        }
         continuation?.finish()
+    }
+
+    /// Waits for the session to report `.ended`, giving up after a few seconds.
+    ///
+    /// Bounded because a session that never reports must not strand the user on a screen
+    /// with no working End button — saving a slightly imperfect workout beats hanging.
+    private func waitForSessionEnd() async {
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { [weak self] in
+                await withCheckedContinuation { continuation in
+                    guard let self else { return continuation.resume() }
+                    self.sessionEndContinuation = continuation
+                }
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(5))
+            }
+            await group.next()
+            group.cancelAll()
+        }
+        resumeSessionEndIfNeeded()
+    }
+
+    private func resumeSessionEndIfNeeded() {
+        sessionEndContinuation?.resume()
+        sessionEndContinuation = nil
     }
 
     /// Conditions explain a lot about a run — heart rate for a given pace climbs sharply
@@ -280,7 +319,10 @@ extension LiveMetricSource: HKWorkoutSessionDelegate {
         didChangeTo toState: HKWorkoutSessionState,
         from fromState: HKWorkoutSessionState,
         date: Date
-    ) {}
+    ) {
+        guard toState == .ended || toState == .stopped else { return }
+        resumeSessionEndIfNeeded()
+    }
 
     /// The conflict usually lands here rather than at `start()`: another app can seize the
     /// watch's single workout session mid-run, which ends ours.

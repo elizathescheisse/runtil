@@ -16,6 +16,15 @@ import RuntilCore
 @Observable
 final class MirroredWorkoutObserver: NSObject {
 
+    /// A single instance, installed from `didFinishLaunchingWithOptions`.
+    ///
+    /// HealthKit delivers a mirrored session to whichever store had the handler set, so
+    /// there has to be exactly one and it has to exist before the session arrives. A
+    /// SwiftUI @State initializer is not a launch hook — it runs when the view graph
+    /// first needs it, which can be after the phone was woken specifically to receive
+    /// this.
+    static let shared = MirroredWorkoutObserver()
+
     enum Availability: Equatable {
         /// WCSession hasn't finished activating, so we genuinely don't know yet.
         case checking
