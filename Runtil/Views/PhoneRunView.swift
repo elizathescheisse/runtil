@@ -71,7 +71,7 @@ private struct PlanPickerView: View {
             } header: {
                 Text("Start a run")
             } footer: {
-                Text("Tap a plan to start tracking. Editing plans happens in the Plans tab.\n\nTime, distance and pace work on their own. Heart-rate plans need a live reading from a paired Bluetooth monitor — a chest strap, an armband, or anything else that broadcasts heart rate. An Apple Watch can't feed heart rate to your phone fast enough to cue you, so run those plans from the watch app instead.")
+                Text("Tap a plan to start tracking. Editing plans happens in the Plans tab.\n\nTime, distance and pace work on their own. Heart-rate plans need a live reading — either a paired Bluetooth monitor, or start the plan from the runtil watch app, which has the sensor on your wrist.")
             }
 
             Section("Heart rate") {

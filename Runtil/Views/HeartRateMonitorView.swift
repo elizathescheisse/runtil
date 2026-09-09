@@ -44,7 +44,7 @@ struct HeartRateMonitorView: View {
                 Text("Any monitor using the standard Bluetooth heart rate profile: chest straps, optical armbands, and some earbuds and bike computers. No particular brand required.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
-                Text("An Apple Watch can't be used here. It won't send heart rate to your phone quickly enough to cue you mid-run — use the runtil watch app for heart-rate plans instead, where the reading is right there on your wrist.")
+                Text("If you have an Apple Watch, start heart-rate plans from the watch app instead — the reading is already on your wrist, and no extra hardware is needed.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
