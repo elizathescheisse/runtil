@@ -28,7 +28,12 @@
 	<true/>
 	<key>WKBackgroundModes</key>
 	<array>
+		<!-- workout-processing earns background runtime for the session and lets haptics
+		     reach the wrist with the screen off. `location` is separately required before
+		     allowsBackgroundLocationUpdates may be set at all — without it CoreLocation
+		     raises an exception and takes the app down the instant a run starts. -->
 		<string>workout-processing</string>
+		<string>location</string>
 	</array>
 	<key>NSHealthShareUsageDescription</key>
 	<string>runtil reads your heart rate and distance during a run so it can tap your wrist when it is time to switch between running and walking.</string>

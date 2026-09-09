@@ -31,6 +31,12 @@ final class LiveMetricSource: NSObject, MetricSource {
     /// Whether the phone is currently receiving a live copy of this run.
     private(set) var isMirroring = false
 
+    /// Whether this build is actually allowed to keep location running in the background.
+    static var declaresLocationBackgroundMode: Bool {
+        let modes = Bundle.main.object(forInfoDictionaryKey: "WKBackgroundModes") as? [String]
+        return modes?.contains("location") ?? false
+    }
+
     /// When false the run is discarded at the end instead of saved, so a second app
     /// recording the same run doesn't produce a duplicate workout in Health.
     private let savesToHealth: Bool
@@ -142,7 +148,13 @@ final class LiveMetricSource: NSObject, MetricSource {
         locationManager.requestWhenInUseAuthorization()
         // Without this, location updates stop the moment the screen sleeps — which would
         // lose both the route and pace cues for most of the run.
-        locationManager.allowsBackgroundLocationUpdates = true
+        //
+        // Guarded because CoreLocation raises an exception, rather than failing quietly,
+        // if the `location` background mode isn't declared. A missing plist entry should
+        // cost pace accuracy, not take the whole run down mid-stride.
+        if Self.declaresLocationBackgroundMode {
+            locationManager.allowsBackgroundLocationUpdates = true
+        }
         locationManager.startUpdatingLocation()
 
         startTicking()
