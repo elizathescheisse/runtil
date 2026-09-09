@@ -33,6 +33,13 @@ struct PlanEditorView: View {
                     .onChange(of: plan.driveMode) { _, newMode in
                         retargetSegments(to: newMode)
                     }
+                    // Zone edits have to reach the triggers too. A heart-rate segment
+                    // stores a plain BPM, so correcting your zones without this leaves the
+                    // plan chasing the old numbers — the most damaging kind of stale value,
+                    // because everything still looks right.
+                    .onChange(of: plan.zones) { oldZones, _ in
+                        syncHeartRateTriggersToZones(previously: oldZones)
+                    }
                 } header: {
                     Text("Drive mode")
                 } footer: {
@@ -102,6 +109,33 @@ struct PlanEditorView: View {
 
     /// Switching drive mode rewrites each segment's trigger to one that mode can actually
     /// use, so a plan can never end up with segments that contradict its own mode.
+    /// Moves heart-rate triggers onto the current zone boundaries.
+    ///
+    /// Only touches segments that were already sitting on the old boundaries, so a
+    /// deliberately custom target — "run until 145" — survives a zone edit intact.
+    private func syncHeartRateTriggersToZones(previously old: HeartRateZones) {
+        guard plan.driveMode == .heartRate else { return }
+        let zone = plan.advisories.heartRateGuard?.zone ?? 2
+        let wasRange = old.range(forZone: zone)
+        let nowRange = plan.zones.range(forZone: zone)
+
+        plan.segments = plan.segments.map { segment in
+            var updated = segment
+            switch segment.end {
+            // Only move a trigger that was sitting on the old boundary. One deliberately
+            // set elsewhere — "run until 145" — was a choice, and a zone edit shouldn't
+            // quietly overwrite it.
+            case .heartRateAtOrAbove(let bpm) where bpm == wasRange.upperBound:
+                updated.end = .heartRateAtOrAbove(bpm: nowRange.upperBound)
+            case .heartRateAtOrBelow(let bpm) where bpm == wasRange.lowerBound:
+                updated.end = .heartRateAtOrBelow(bpm: nowRange.lowerBound)
+            default:
+                break
+            }
+            return updated
+        }
+    }
+
     private func retargetSegments(to mode: DriveMode) {
         let z2 = plan.zones.range(forZone: 2)
         plan.segments = plan.segments.map { segment in
