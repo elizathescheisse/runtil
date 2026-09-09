@@ -166,10 +166,10 @@ private struct PlanRow: View {
 
     var body: some View {
         HStack(spacing: 9) {
-            // Matches the phone, so the two apps read the same way. Always green here —
-            // unlike the phone, the watch has the heart rate sensor, so every plan is
-            // runnable and nothing needs gating.
-            Image(systemName: "play.circle.fill")
+            // Outline means "available to start". Solid is reserved for the run actually
+            // in progress, so a glance tells you whether anything is live. Always green
+            // here — unlike the phone, the watch has the sensor, so nothing needs gating.
+            Image(systemName: "play.circle")
                 .font(.title3)
                 .foregroundStyle(.green)
 

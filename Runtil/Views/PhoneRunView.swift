@@ -64,7 +64,9 @@ private struct PlanPickerView: View {
                             // Leading, so it reads as "press play on this one" rather than
                             // as a status badge trailing the row. Always occupies the slot
                             // so the names stay aligned whether a plan is runnable or not.
-                            Image(systemName: "play.circle.fill")
+                            //
+                            // Outline means available; solid is kept for a run in progress.
+                            Image(systemName: "play.circle")
                                 .font(.title)
                                 .foregroundStyle(controller.canRun(plan) ? .green : .secondary)
 
