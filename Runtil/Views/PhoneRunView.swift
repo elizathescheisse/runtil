@@ -93,7 +93,7 @@ private struct PlanPickerView: View {
 
             Section {
                 LabeledContent {
-                    Text(mirror.availability == .ready ? "Ready" : "Unavailable")
+                    Text(mirror.availability.statusText)
                         .foregroundStyle(mirror.availability == .ready ? .green : .secondary)
                 } label: {
                     Label("Apple Watch", systemImage: "applewatch")

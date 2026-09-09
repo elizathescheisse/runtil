@@ -17,6 +17,8 @@ import RuntilCore
 final class MirroredWorkoutObserver: NSObject {
 
     enum Availability: Equatable {
+        /// WCSession hasn't finished activating, so we genuinely don't know yet.
+        case checking
         case ready
         case noPairedWatch
         case watchAppNotInstalled
@@ -25,6 +27,7 @@ final class MirroredWorkoutObserver: NSObject {
         var explanation: String? {
             switch self {
             case .ready: return nil
+            case .checking: return nil
             case .noPairedWatch:
                 return "Pair an Apple Watch to see heart-rate runs here while they happen."
             case .watchAppNotInstalled:
@@ -33,11 +36,19 @@ final class MirroredWorkoutObserver: NSObject {
                 return "Health data isn't available on this device."
             }
         }
+
+        var statusText: String {
+            switch self {
+            case .ready: return "Ready"
+            case .checking: return "Checking…"
+            default: return "Unavailable"
+            }
+        }
     }
 
     private(set) var state: MirroredState?
     private(set) var isActive = false
-    private(set) var availability: Availability = .ready
+    private(set) var availability: Availability = .checking
 
     private let store = HKHealthStore()
     private var session: HKWorkoutSession?
@@ -63,8 +74,22 @@ final class MirroredWorkoutObserver: NSObject {
         availability = WatchPairing.current()
     }
 
+    /// Re-checks, and keeps re-checking briefly if the answer isn't known yet.
+    ///
+    /// WCSession activates asynchronously, so a check made the instant the view appears
+    /// can land before the answer exists. Rather than guess in either direction, it stays
+    /// `.checking` and asks again.
     func refreshAvailability() {
         checkAvailability()
+        guard availability == .checking else { return }
+        Task { [weak self] in
+            for _ in 0..<5 {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self else { return }
+                self.checkAvailability()
+                if self.availability != .checking { return }
+            }
+        }
     }
 
     private func beginObserving() {
@@ -144,7 +169,9 @@ enum WatchPairing {
     static func current() -> MirroredWorkoutObserver.Availability {
         guard WCSession.isSupported() else { return .noPairedWatch }
         let session = WCSession.default
-        guard session.activationState == .activated else { return .ready }
+        // Unknown, not assumed. Claiming ready here would tell someone with only a chest
+        // strap to "start on watch" for a watch they don't own.
+        guard session.activationState == .activated else { return .checking }
         guard session.isPaired else { return .noPairedWatch }
         guard session.isWatchAppInstalled else { return .watchAppNotInstalled }
         return .ready
