@@ -137,6 +137,20 @@ private struct PlanRow: View {
     let plan: WorkoutPlan
 
     var body: some View {
+        HStack(spacing: 9) {
+            // Matches the phone, so the two apps read the same way. Always green here —
+            // unlike the phone, the watch has the heart rate sensor, so every plan is
+            // runnable and nothing needs gating.
+            Image(systemName: "play.circle.fill")
+                .font(.title3)
+                .foregroundStyle(.green)
+
+            details
+        }
+        .padding(.vertical, 2)
+    }
+
+    private var details: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(plan.name)
                 .font(.headline)
@@ -151,7 +165,6 @@ private struct PlanRow: View {
             .font(.caption2)
             .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 2)
     }
 
     private var icon: String {
