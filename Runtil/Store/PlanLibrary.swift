@@ -11,6 +11,8 @@ final class PlanLibrary: NSObject {
     private(set) var plans: [WorkoutPlan] = []
     private(set) var lastPushedAt: Date?
     private(set) var watchReachable = false
+    /// Why the last sync didn't land, so a failure is visible rather than silent.
+    private(set) var lastSyncProblem: String?
 
     /// Set when zones were filled in from Health, so the app can say what it did rather
     /// than silently changing numbers the user is about to train against.
@@ -169,18 +171,45 @@ final class PlanLibrary: NSObject {
     /// value and delivers it whenever the watch next wakes, which matches a small library
     /// that's fully replaced each time. `transferUserInfo` is the fallback because the
     /// context call throws if it's invoked too rapidly.
-    func push() {
-        guard WCSession.isSupported() else { return }
+    /// Sends the whole library to the watch.
+    ///
+    /// Reports rather than returns quietly. Giving up silently when the session wasn't
+    /// ready meant an edit made a moment too early was simply never delivered, and both
+    /// devices went on showing different numbers with nothing indicating a problem.
+    @discardableResult
+    func push() -> Bool {
+        guard WCSession.isSupported() else {
+            lastSyncProblem = "This iPhone can't pair with a watch."
+            return false
+        }
         let session = WCSession.default
-        guard session.activationState == .activated else { return }
-        guard let data = try? JSONEncoder().encode(plans) else { return }
+
+        guard session.activationState == .activated else {
+            lastSyncProblem = "Still connecting to your watch. Try again in a moment."
+            // Activation is asynchronous, so ask again rather than leaving it unsent.
+            session.activate()
+            return false
+        }
+        guard let data = try? JSONEncoder().encode(plans) else {
+            lastSyncProblem = "Couldn't package your plans."
+            return false
+        }
 
         do {
             try session.updateApplicationContext(["plans": data])
         } catch {
+            // The context call throws if called too rapidly; the queued transfer still
+            // arrives, so this is a fallback rather than a failure.
             session.transferUserInfo(["plans": data])
         }
+        lastSyncProblem = nil
         lastPushedAt = Date()
+        return true
+    }
+
+    /// Explicit "send it now", for when the automatic push missed its moment.
+    func syncNow() {
+        push()
     }
 }
 
@@ -203,6 +232,10 @@ extension PlanLibrary: WCSessionDelegate {
     }
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
-        Task { @MainActor in self.watchReachable = session.isReachable }
+        Task { @MainActor in
+            self.watchReachable = session.isReachable
+            // A watch that just came within reach may have missed an earlier push.
+            if session.isReachable { self.push() }
+        }
     }
 }

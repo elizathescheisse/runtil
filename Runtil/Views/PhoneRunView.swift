@@ -120,6 +120,27 @@ private struct PlanPickerView: View {
                         Label("Bluetooth monitor", systemImage: "sensor.tag.radiowaves.forward")
                     }
                 }
+
+                // Plans are pushed automatically on every edit, but a push can miss its
+                // moment if the session wasn't ready — so there's a way to ask again
+                // rather than the two devices quietly disagreeing.
+                Button {
+                    library.syncNow()
+                } label: {
+                    LabeledContent {
+                        if let pushed = library.lastPushedAt {
+                            Text(pushed.formatted(date: .omitted, time: .shortened))
+                                .foregroundStyle(.secondary)
+                        }
+                    } label: {
+                        Label("Send plans to watch", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                }
+                if let problem = library.lastSyncProblem {
+                    Text(problem)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
             } header: {
                 Text("Heart rate source")
             } footer: {

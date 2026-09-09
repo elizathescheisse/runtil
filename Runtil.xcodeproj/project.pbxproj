@@ -143,7 +143,7 @@
 		F0A4C32787AB066C2B16A9FE /* HeartRateMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateMonitorView.swift; sourceTree = "<group>"; };
 		FC0038C93211A5142A1C760E /* ZoneEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneEditorView.swift; sourceTree = "<group>"; };
 		FD86FE4742FED4907B7F9560 /* PlanEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanEntity.swift; sourceTree = "<group>"; };
-		"TEMP_5AED27EB-015A-4641-964E-E3C3F71C177D" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		"TEMP_1A8FD2B7-5EA8-4FFA-AD94-7119399FC826" /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -332,10 +332,10 @@
 			path = Workout;
 			sourceTree = "<group>";
 		};
-		"TEMP_39D4DC63-3AE8-4C44-98E6-548B7A9801AE" /* haptics */ = {
+		"TEMP_0DFFFED3-62BB-4477-BC53-1B3850556371" /* haptics */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_5AED27EB-015A-4641-964E-E3C3F71C177D" /* Local.xcconfig */,
+				"TEMP_1A8FD2B7-5EA8-4FFA-AD94-7119399FC826" /* Local.xcconfig */,
 			);
 			path = haptics;
 			sourceTree = "<group>";
@@ -578,7 +578,7 @@
 		};
 		3427D6FE32EC695648C53188 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_5AED27EB-015A-4641-964E-E3C3F71C177D" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_1A8FD2B7-5EA8-4FFA-AD94-7119399FC826" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -612,7 +612,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -697,7 +697,7 @@
 		};
 		B1A6786C4F3763ED5BFBCA00 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_5AED27EB-015A-4641-964E-E3C3F71C177D" /* Local.xcconfig */;
+			baseConfigurationReference = "TEMP_1A8FD2B7-5EA8-4FFA-AD94-7119399FC826" /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -731,7 +731,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
