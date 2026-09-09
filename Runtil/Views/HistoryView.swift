@@ -12,6 +12,8 @@ struct HistoryView: View {
 
     @State private var workouts: [HKWorkout] = []
     @State private var status: Status = .loading
+    @State private var pendingDeletion: HKWorkout?
+    @State private var deletionProblem: String?
 
     enum Status: Equatable {
         case loading
@@ -43,11 +45,18 @@ struct HistoryView: View {
                         description: Text("Start a plan from your watch and it'll show up here.")
                     )
                 case .ready:
-                    List(workouts, id: \.uuid) { workout in
-                        NavigationLink {
-                            WorkoutDetailView(workout: workout, zones: zones)
-                        } label: {
-                            WorkoutRow(workout: workout)
+                    List {
+                        ForEach(workouts, id: \.uuid) { workout in
+                            NavigationLink {
+                                WorkoutDetailView(workout: workout, zones: zones)
+                            } label: {
+                                WorkoutRow(workout: workout)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button("Delete", role: .destructive) {
+                                    pendingDeletion = workout
+                                }
+                            }
                         }
                     }
                 }
@@ -55,6 +64,37 @@ struct HistoryView: View {
             .navigationTitle("History")
             .task { await load() }
             .refreshable { await load() }
+            // Confirmed rather than immediate: this removes the run from Health itself,
+            // not just from runtil, and there is no undo.
+            .confirmationDialog(
+                "Delete this run?",
+                isPresented: Binding(
+                    get: { pendingDeletion != nil },
+                    set: { if !$0 { pendingDeletion = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Delete from Health", role: .destructive) {
+                    if let workout = pendingDeletion {
+                        Task { await delete(workout) }
+                    }
+                    pendingDeletion = nil
+                }
+                Button("Cancel", role: .cancel) { pendingDeletion = nil }
+            } message: {
+                Text("This removes the workout from Health permanently. It can't be undone.")
+            }
+            .alert(
+                "Couldn't delete",
+                isPresented: Binding(
+                    get: { deletionProblem != nil },
+                    set: { if !$0 { deletionProblem = nil } }
+                )
+            ) {
+                Button("OK") { deletionProblem = nil }
+            } message: {
+                Text(deletionProblem ?? "")
+            }
         }
     }
 
@@ -65,7 +105,11 @@ struct HistoryView: View {
         }
         do {
             try await store.requestAuthorization(
-                toShare: [HKQuantityType(.workoutEffortScore)],
+                toShare: [
+                    HKQuantityType(.workoutEffortScore),
+                    // Write access is what permits deletion, not just saving.
+                    HKQuantityType.workoutType()
+                ],
                 read: [
                     HKObjectType.workoutType(),
                     HKQuantityType(.heartRate),
@@ -79,6 +123,20 @@ struct HistoryView: View {
             status = .ready
         } catch {
             status = .denied
+        }
+    }
+
+    /// Removes a workout from Health.
+    ///
+    /// HealthKit only permits deleting samples this app saved, which is exactly the set
+    /// worth offering — a run recorded by another app isn't ours to remove, and the
+    /// failure says so rather than appearing to work.
+    private func delete(_ workout: HKWorkout) async {
+        do {
+            try await store.delete(workout)
+            workouts.removeAll { $0.uuid == workout.uuid }
+        } catch {
+            deletionProblem = "runtil can only delete runs it recorded itself. This one was saved by another app."
         }
     }
 
