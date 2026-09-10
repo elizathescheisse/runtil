@@ -38,6 +38,29 @@ public enum Format {
     }
 
     /// Drops a pointless trailing ".0" so plan names read "1/0.25 mi", not "1.0/0.25 mi".
+    /// A temperature, in whatever unit this device is set to show temperatures in.
+    ///
+    /// Weather is stored in Celsius throughout — HealthKit's key is a unit-bearing quantity
+    /// and the maths (dew point, comfort bands) is defined in Celsius — but nobody should
+    /// have to read their run in units they don't think in.
+    ///
+    /// `MeasurementFormatter` does the choosing, not a region check of our own. It follows
+    /// the same preference iOS exposes as Settings › General › Language & Region ›
+    /// Temperature, which is a separate switch from the region: someone in the US who has
+    /// set Celsius gets Celsius, and a region default applies only when they haven't said.
+    ///
+    /// - Parameter locale: injectable so the behaviour can be tested at a desk; the default
+    ///   auto-updates, so flipping the setting takes effect without relaunching.
+    public static func temperature(
+        celsius: Double,
+        locale: Locale = .autoupdatingCurrent
+    ) -> String {
+        let formatter = MeasurementFormatter()
+        formatter.locale = locale
+        formatter.numberFormatter.maximumFractionDigits = 0
+        return formatter.string(from: Measurement(value: celsius, unit: UnitTemperature.celsius))
+    }
+
     public static func trimmed(_ value: Double) -> String {
         value == value.rounded() ? String(Int(value)) : String(format: "%g", value)
     }

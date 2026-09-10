@@ -72,12 +72,12 @@ struct WorkoutDetailView: View {
             }
             if let weather = loader.weather {
                 LabeledContent("Conditions") {
-                    Text("\(Int(weather.temperatureCelsius))°C · \(Int(weather.relativeHumidity * 100))% humidity")
+                    Text("\(Format.temperature(celsius: weather.temperatureCelsius)) · \(Int(weather.relativeHumidity * 100))% humidity")
                 }
                 // Dew point, not humidity, is what predicts a slowdown — so it gets the
                 // plain-language verdict next to it rather than being left as a number.
                 LabeledContent("Dew point") {
-                    Text("\(Int(weather.effectiveDewPointCelsius.rounded()))°C · \(weather.comfort.label)")
+                    Text("\(Format.temperature(celsius: weather.effectiveDewPointCelsius)) · \(weather.comfort.label)")
                         .foregroundStyle(Self.comfortColor(weather.comfort))
                 }
                 Text(weather.comfort.effect)
